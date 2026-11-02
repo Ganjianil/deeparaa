@@ -3023,9 +3023,20 @@ article.slide-panel {
     -16px -24px 56px rgba(17, 17, 17, 0.14),
     0 0 0 1px rgba(17, 17, 17, 0.05);
   transform-origin: 100% 100%;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   will-change: transform, opacity;
   transform: translate3d(0, 0, 0);
   opacity: 1;
+}
+
+.slide-panel,
+.kota-panel.slide-panel,
+section.slide-panel,
+article.slide-panel {
+  perspective: 1400px;
+  perspective-origin: 70% 80%;
 }
 
 .slide-panel__sheet--intro {

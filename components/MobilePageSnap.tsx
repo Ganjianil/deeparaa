@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-const ANIM_MS = 2000;
+const ANIM_MS = 1150;
 
 function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
@@ -20,9 +20,8 @@ function layoutTop(el: HTMLElement) {
 }
 
 /**
- * Full-page snap on ALL devices (phone, tablet, desktop):
- * each scroll/swipe jumps to the next page with a bottom-right slide-in.
- * Touch is intercepted so iOS native vertical sticky cannot replace the effect.
+ * Full-page snap on ALL devices:
+ * each scroll/swipe flips the next page in from the bottom-right (3D card flip).
  */
 export function MobilePageSnap() {
   useEffect(() => {
@@ -66,17 +65,31 @@ export function MobilePageSnap() {
       const sheet = page.querySelector<HTMLElement>(".slide-panel__sheet");
       if (!sheet) return;
 
+      // Flip hinge from bottom-right corner
+      sheet.style.transformOrigin = "100% 100%";
+      sheet.style.backfaceVisibility = "hidden";
+      sheet.style.webkitBackfaceVisibility = "hidden";
+
+      const parent = sheet.parentElement;
+      if (parent) {
+        parent.style.perspective = "1400px";
+        parent.style.perspectiveOrigin = "70% 80%";
+      }
+
       sheet.style.transition = withTransition
-        ? "transform 2s cubic-bezier(0.22, 0.61, 0.36, 1), opacity 1.5s ease, border-radius 2s ease, box-shadow 2s ease"
+        ? "transform 1.15s cubic-bezier(0.22, 0.8, 0.28, 1), opacity 0.85s ease, border-radius 1.15s ease, box-shadow 1.15s ease"
         : "none";
 
       if (state === "from-br") {
-        sheet.style.transform = "translate3d(62vw, 118%, 0) scale(0.9)";
-        sheet.style.opacity = "0.2";
-        sheet.style.borderRadius = "1.85rem 1.85rem 0 0";
-        sheet.style.boxShadow = "-32px -48px 90px rgba(17, 17, 17, 0.24)";
+        // 3D flip-in from bottom-right
+        sheet.style.transform =
+          "translate3d(18vw, 22vh, 0) rotateX(58deg) rotateY(-42deg) scale(0.88)";
+        sheet.style.opacity = "0.15";
+        sheet.style.borderRadius = "1.5rem";
+        sheet.style.boxShadow = "-28px -36px 70px rgba(17, 17, 17, 0.28)";
       } else if (state === "to") {
-        sheet.style.transform = "translate3d(0, 0, 0) scale(1)";
+        sheet.style.transform =
+          "translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg) scale(1)";
         sheet.style.opacity = "1";
         sheet.style.borderRadius = "0";
         sheet.style.boxShadow = "";
@@ -86,6 +99,12 @@ export function MobilePageSnap() {
         sheet.style.borderRadius = "";
         sheet.style.boxShadow = "";
         sheet.style.transition = "";
+        sheet.style.transformOrigin = "";
+        sheet.style.backfaceVisibility = "";
+        if (parent) {
+          parent.style.perspective = "";
+          parent.style.perspectiveOrigin = "";
+        }
       }
     };
 
@@ -125,7 +144,7 @@ export function MobilePageSnap() {
           const wait = hasSheet ? ANIM_MS : 180;
           unlockTimer = window.setTimeout(() => unlock(next), wait);
         });
-      }, hasSheet ? 200 : 40);
+      }, hasSheet ? 90 : 30);
     };
 
     const sheetBlocksPageSwipe = (
