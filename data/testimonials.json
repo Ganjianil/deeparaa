@@ -1,0 +1,30 @@
+[
+  {
+    "id": "1",
+    "quote": "Digital Agency Pro rebuilt our site and doubled lead form submissions within three months. Their team is responsive, strategic, and genuinely invested in our growth.",
+    "name": "Priya Sharma",
+    "role": "Marketing Director",
+    "company": "Nova Retail Group"
+  },
+  {
+    "id": "2",
+    "quote": "From discovery to launch, the process was transparent. Our custom dashboard saves hours every week and our stakeholders love the clean design.",
+    "name": "James Okonkwo",
+    "role": "COO",
+    "company": "BluePeak Finance"
+  },
+  {
+    "id": "3",
+    "quote": "They managed our paid campaigns with discipline and creativity. CAC dropped 28% while we expanded into two new markets.",
+    "name": "Elena Vasquez",
+    "role": "Founder",
+    "company": "Urban Eats Co."
+  },
+  {
+    "id": "4",
+    "quote": "The mobile app they delivered exceeded our expectations. Smooth performance, thoughtful UX, and a partnership we plan to continue long term.",
+    "name": "David Chen",
+    "role": "Product Lead",
+    "company": "TechForge Labs"
+  }
+]

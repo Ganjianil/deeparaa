@@ -1,0 +1,59 @@
+
+[
+  {
+    "id": "1",
+    "name": "Nova Retail",
+    "initials": "NR",
+    "industry": "Retail",
+    "logo": "./novaretail.png"
+  },
+  {
+    "id": "2",
+    "name": "Summit Health",
+    "initials": "SH",
+    "industry": "Healthcare",
+    "logo": "./summithealth.png"
+  },
+  {
+    "id": "3",
+    "name": "BluePeak Finance",
+    "initials": "BF",
+    "industry": "Finance",
+    "logo": "/bluepeak.png"
+  },
+  {
+    "id": "4",
+    "name": "Urban Eats",
+    "initials": "UE",
+    "industry": "Food & Beverage",
+    "logo": "/urbaneats.png"
+  },
+  {
+    "id": "5",
+    "name": "TechForge Labs",
+    "initials": "TL",
+    "industry": "Technology",
+    "logo": "/techforge.png"
+  },
+  {
+    "id": "6",
+    "name": "GreenRoute Logistics",
+    "initials": "GR",
+    "industry": "Logistics",
+    "logo": "/greenroute.png"
+  },
+  {
+    "id": "7",
+    "name": "Studio Meridian",
+    "initials": "SM",
+    "industry": "Creative",
+    "logo": "/studiomerdian.png"
+  },
+  {
+    "id": "8",
+    "name": "Apex Education",
+    "initials": "AE",
+    "industry": "EdTech",
+    "logo": "/apex.png"
+  }
+]

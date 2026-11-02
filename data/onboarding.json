@@ -1,0 +1,27 @@
+[
+  {
+    "step": 1,
+    "title": "Discovery",
+    "description": "We learn your goals, audience, competitors, and success metrics through workshops and research."
+  },
+  {
+    "step": 2,
+    "title": "Strategy",
+    "description": "We define positioning, channel mix, timelines, and KPIs aligned with your business objectives."
+  },
+  {
+    "step": 3,
+    "title": "Design & Development",
+    "description": "Our team designs and builds iteratively with your feedback at every milestone."
+  },
+  {
+    "step": 4,
+    "title": "Testing",
+    "description": "QA, performance checks, and user validation ensure everything works flawlessly before launch."
+  },
+  {
+    "step": 5,
+    "title": "Launch",
+    "description": "We deploy, monitor, and hand off with documentation plus ongoing optimization support."
+  }
+]

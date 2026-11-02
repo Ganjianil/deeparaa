@@ -1,0 +1,101 @@
+{
+  "website-design": {
+    "slug": "website-design",
+    "title": "Website Design",
+    "tagline": "Beautiful, fast websites that turn visitors into customers.",
+    "heroDescription": "We craft responsive, accessible websites with clear information architecture, compelling copy support, and SEO-ready foundations.",
+    "features": [
+      {
+        "title": "UX Research & Wireframes",
+        "description": "User flows and prototypes validated before visual design begins."
+      },
+      {
+        "title": "Brand-Aligned UI",
+        "description": "Custom design systems that reflect your identity across every page."
+      },
+      {
+        "title": "Performance Optimized",
+        "description": "Core Web Vitals-focused builds for speed on mobile and desktop."
+      },
+      {
+        "title": "CMS Integration",
+        "description": "Easy content updates via headless or traditional CMS options."
+      },
+      {
+        "title": "Conversion Optimization",
+        "description": "Strategic CTAs, forms, and landing pages tuned for leads and sales."
+      },
+      {
+        "title": "Ongoing Support",
+        "description": "Maintenance plans, analytics reviews, and iterative improvements."
+      }
+    ],
+    "faqIds": ["1", "2", "3"]
+  },
+  "software-development": {
+    "slug": "software-development",
+    "title": "Custom Software Development",
+    "tagline": "Scalable applications built around your workflows.",
+    "heroDescription": "From internal tools to customer-facing platforms, we engineer secure, maintainable software with modern stacks and DevOps best practices.",
+    "features": [
+      {
+        "title": "Discovery & Architecture",
+        "description": "Technical specs, stack selection, and scalable system design."
+      },
+      {
+        "title": "Agile Delivery",
+        "description": "Two-week sprints with demos so you see progress continuously."
+      },
+      {
+        "title": "API & Integrations",
+        "description": "Connect CRMs, payment gateways, ERPs, and third-party services."
+      },
+      {
+        "title": "Cloud-Native",
+        "description": "Deploy on AWS, Azure, or GCP with monitoring and CI/CD pipelines."
+      },
+      {
+        "title": "Security First",
+        "description": "Authentication, encryption, and compliance-aware development."
+      },
+      {
+        "title": "Long-Term Partnership",
+        "description": "Documentation, handoff, and optional dedicated support retainers."
+      }
+    ],
+    "faqIds": ["1", "2", "3", "5"]
+  },
+  "ecommerce-app": {
+    "slug": "ecommerce-app",
+    "title": "E-commerce App Development",
+    "tagline": "Online stores and marketplaces that scale with your catalog.",
+    "heroDescription": "We build Shopify, WooCommerce, and custom storefronts with seamless checkout, inventory sync, and marketing integrations.",
+    "features": [
+      {
+        "title": "Storefront Design",
+        "description": "Mobile-first shopping experiences that showcase products beautifully."
+      },
+      {
+        "title": "Payment & Shipping",
+        "description": "Secure checkout with multiple gateways and carrier integrations."
+      },
+      {
+        "title": "Inventory & Orders",
+        "description": "Real-time stock, fulfillment workflows, and admin dashboards."
+      },
+      {
+        "title": "Marketing Tools",
+        "description": "Email capture, abandoned cart flows, and ad pixel setup."
+      },
+      {
+        "title": "Analytics & Reporting",
+        "description": "Revenue, AOV, and funnel insights tied to your business goals."
+      },
+      {
+        "title": "App Extensions",
+        "description": "Custom plugins and mobile companion apps when off-the-shelf is not enough."
+      }
+    ],
+    "faqIds": ["1", "3", "4"]
+  }
+}

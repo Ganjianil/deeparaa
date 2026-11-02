@@ -1,0 +1,27 @@
+[
+  {
+    "id": "1",
+    "question": "What services does Digital Agency Pro offer?",
+    "answer": "We offer web design, digital marketing, mobile apps, e-commerce development, video production, and custom software. Each engagement is tailored to your goals, budget, and timeline."
+  },
+  {
+    "id": "2",
+    "question": "How do you ensure quality across projects?",
+    "answer": "We follow a structured onboarding process, use peer reviews and automated testing, and align deliverables to agreed KPIs. You receive regular updates and staging previews before anything goes live."
+  },
+  {
+    "id": "3",
+    "question": "What are typical project timelines?",
+    "answer": "Marketing retainers begin within 1–2 weeks. Website projects usually run 4–8 weeks. Custom software and apps vary by scope; we provide a detailed timeline after discovery."
+  },
+  {
+    "id": "4",
+    "question": "Which industries do you work with?",
+    "answer": "We partner with startups and established brands in retail, healthcare, finance, education, logistics, and technology. Our playbooks adapt to regulated and fast-moving sectors alike."
+  },
+  {
+    "id": "5",
+    "question": "What makes your agency different?",
+    "answer": "We combine strategy, design, and engineering under one roof—so messaging, creative, and technology stay aligned. You get one accountable team instead of juggling multiple vendors."
+  }
+]
