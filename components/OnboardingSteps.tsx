@@ -20,7 +20,11 @@ const stepIcons: LucideIcon[] = [
 
 export function OnboardingSteps() {
   return (
-    <section id="about" className="premium-onboarding kota-band relative z-10">
+    <section
+      id="about"
+      className="premium-onboarding kota-band slide-panel relative z-10"
+      style={{ ["--slide-z" as string]: 5 }}
+    >
       <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 md:py-28 lg:px-8">
         <div className="mx-auto max-w-3xl text-center">
           <p className="kota-kicker">How we work</p>

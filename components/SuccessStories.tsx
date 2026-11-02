@@ -33,7 +33,11 @@ export function SuccessStories() {
     .slice(0, 2);
 
   return (
-    <section className="premium-stories" aria-labelledby="success-stories-title">
+    <section
+      className="premium-stories slide-panel"
+      style={{ ["--slide-z" as string]: 9 }}
+      aria-labelledby="success-stories-title"
+    >
       <div className="premium-stories__glow" aria-hidden="true" />
       <div className="premium-stories__grain" aria-hidden="true" />
 

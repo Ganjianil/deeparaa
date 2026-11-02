@@ -29,8 +29,9 @@ export default function HomePage() {
       <SuccessStories />
 
       <section
-        className="relative isolate overflow-hidden py-16 sm:py-20 md:py-24"
+        className="slide-panel relative isolate overflow-hidden py-16 sm:py-20 md:py-24"
         style={{
+          ["--slide-z" as string]: 10,
           background:
             "linear-gradient(145deg, var(--brand-800), var(--brand-600))",
           color: "#fff",

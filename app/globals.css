@@ -840,6 +840,92 @@ main section {
   z-index: 2;
 }
 
+/* --------------------------------------------------------------------------
+   Cliqr-like mobile slide stack: each panel pins, next slides over it
+   -------------------------------------------------------------------------- */
+.slide-stack {
+  position: relative;
+}
+
+@media (max-width: 768px) {
+  .slide-panel {
+    position: sticky;
+    top: 0;
+    z-index: var(--slide-z, 1);
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-sizing: border-box;
+    background: #efefef;
+    box-shadow: 0 -18px 48px rgba(17, 17, 17, 0.08);
+    transform: translateZ(0);
+  }
+
+  .slide-panel--intro {
+    min-height: auto;
+    padding-top: 2.5rem;
+    padding-bottom: 1rem;
+    box-shadow: none;
+    background: transparent;
+  }
+
+  .kota-panels.slide-stack {
+    gap: 0;
+    margin: 0;
+  }
+
+  .kota-panel.slide-panel {
+    padding: 1.35rem 1.15rem 2rem;
+    justify-content: flex-start;
+    animation: none;
+  }
+
+  .kota-panel.slide-panel::before {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .premium-onboarding.slide-panel,
+  .premium-clients.slide-panel,
+  .premium-tools.slide-panel,
+  .premium-faq.slide-panel {
+    background: #efefef;
+  }
+
+  .premium-stories.slide-panel {
+    background:
+      radial-gradient(120% 80% at 10% -10%, rgba(255, 255, 255, 0.08), transparent 55%),
+      linear-gradient(160deg, var(--brand-950, #061824), var(--brand-900) 45%, #0a2a3d);
+    box-shadow: 0 -18px 48px rgba(0, 0, 0, 0.28);
+  }
+
+  [data-theme="dark"] .slide-panel,
+  [data-theme="dark"] .premium-onboarding.slide-panel,
+  [data-theme="dark"] .premium-clients.slide-panel,
+  [data-theme="dark"] .premium-tools.slide-panel,
+  [data-theme="dark"] .premium-faq.slide-panel {
+    background: #121212;
+    box-shadow: 0 -18px 48px rgba(0, 0, 0, 0.45);
+  }
+
+  [data-theme="dark"] .kota-panel.slide-panel::before {
+    background: #1a1a1a;
+  }
+}
+
+@media (max-width: 768px) and (prefers-reduced-motion: reduce) {
+  .slide-panel {
+    position: relative;
+    min-height: 0;
+    box-shadow: none;
+  }
+}
+
 .webgl-mesh {
   position: fixed;
   inset: 0;

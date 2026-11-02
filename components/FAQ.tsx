@@ -18,7 +18,11 @@ export function FAQ({ ids, limit }: FAQProps) {
   const baseId = useId();
 
   return (
-    <section id="faq" className="premium-faq kota-band relative z-10">
+    <section
+      id="faq"
+      className="premium-faq kota-band slide-panel relative z-10"
+      style={{ ["--slide-z" as string]: 8 }}
+    >
       <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 md:py-28 lg:px-8">
         <div className="premium-faq__shell">
           <div className="premium-faq__intro">
