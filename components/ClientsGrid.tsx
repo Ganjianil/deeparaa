@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { SlideSheet } from "@/components/SlideSheet";
 
 type Client = {
   id: string;
@@ -68,9 +69,10 @@ export function ClientsGrid() {
   return (
     <section
       id="clients"
-      className="premium-clients kota-band slide-panel relative z-10"
+      className="premium-clients kota-band slide-panel z-10"
       style={{ ["--slide-z" as string]: 6 }}
     >
+      <SlideSheet>
       <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 md:py-28 lg:px-8">
         <div className="flex flex-col items-start justify-between gap-8 md:flex-row md:items-end">
           <div className="max-w-2xl">
@@ -130,6 +132,7 @@ export function ClientsGrid() {
           </div>
         )}
       </div>
+      </SlideSheet>
     </section>
   );
 }

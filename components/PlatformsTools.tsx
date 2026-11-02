@@ -11,6 +11,7 @@ import * as SimpleIcons from "react-icons/si";
 import { FaGoogle } from "react-icons/fa";
 import type { ElementType } from "react";
 import tools from "@/data/tools.json";
+import { SlideSheet } from "@/components/SlideSheet";
 
 type BrandConfig = {
   icon: string;
@@ -116,9 +117,10 @@ export function PlatformsTools() {
 
   return (
     <section
-      className="premium-tools kota-band slide-panel relative z-10"
+      className="premium-tools kota-band slide-panel z-10"
       style={{ ["--slide-z" as string]: 7 }}
     >
+      <SlideSheet>
       <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 md:py-28 lg:px-8">
         <div className="mx-auto max-w-3xl text-center">
           <p className="kota-kicker">Platforms &amp; tools</p>
@@ -231,6 +233,7 @@ export function PlatformsTools() {
           })}
         </div>
       </div>
+      </SlideSheet>
     </section>
   );
 }

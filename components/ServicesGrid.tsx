@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { SlideSheet } from "@/components/SlideSheet";
 
 const servicePanels = [
   {
@@ -58,19 +59,24 @@ const servicePanels = [
 export function ServicesGrid() {
   return (
     <section id="services" className="kota-band relative z-10">
-      <div className="slide-panel slide-panel--intro" style={{ ["--slide-z" as string]: 1 }}>
-        <div className="mx-auto max-w-7xl px-4 py-16 md:px-6 md:py-20 lg:px-8">
-          <div className="max-w-3xl">
-            <p className="kota-kicker">Our services</p>
-            <h2 className="kota-display mt-3">
-              Everything you need to win online
-            </h2>
-            <p className="mt-5 max-w-2xl text-base leading-7 text-neutral-700 sm:text-lg sm:leading-8">
-              From first impression to long-term growth, we cover the full digital
-              lifecycle with specialised teams and a clear strategy.
-            </p>
+      <div
+        className="slide-panel slide-panel--intro"
+        style={{ ["--slide-z" as string]: 1 }}
+      >
+        <SlideSheet className="slide-panel__sheet--intro">
+          <div className="mx-auto max-w-7xl px-4 py-16 md:px-6 md:py-20 lg:px-8">
+            <div className="max-w-3xl">
+              <p className="kota-kicker">Our services</p>
+              <h2 className="kota-display mt-3">
+                Everything you need to win online
+              </h2>
+              <p className="mt-5 max-w-2xl text-base leading-7 text-neutral-700 sm:text-lg sm:leading-8">
+                From first impression to long-term growth, we cover the full
+                digital lifecycle with specialised teams and a clear strategy.
+              </p>
+            </div>
           </div>
-        </div>
+        </SlideSheet>
       </div>
 
       <div className="kota-panels slide-stack">
@@ -78,43 +84,42 @@ export function ServicesGrid() {
           <article
             key={panel.id}
             className={`kota-panel kota-panel--${panel.accent} slide-panel`}
-            style={{
-              ["--slide-z" as string]: index + 2,
-              animationDelay: `${index * 90}ms`,
-            }}
+            style={{ ["--slide-z" as string]: index + 2 }}
           >
-            <div className="kota-panel__content">
-              <h3 className="kota-panel__title">{panel.title}</h3>
+            <SlideSheet>
+              <div className="kota-panel__content">
+                <h3 className="kota-panel__title">{panel.title}</h3>
 
-              <div className="kota-panel__tags">
-                {panel.tags.map((tag) => (
-                  <Link
-                    key={tag.href + tag.label}
-                    href={tag.href}
-                    className="kota-tag"
-                  >
-                    {tag.label}
-                  </Link>
-                ))}
+                <div className="kota-panel__tags">
+                  {panel.tags.map((tag) => (
+                    <Link
+                      key={tag.href + tag.label}
+                      href={tag.href}
+                      className="kota-tag"
+                    >
+                      {tag.label}
+                    </Link>
+                  ))}
+                </div>
+
+                <p className="kota-panel__text">{panel.description}</p>
+
+                <Link href={panel.href} className="kota-more">
+                  <span>Find out more</span>
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                </Link>
               </div>
 
-              <p className="kota-panel__text">{panel.description}</p>
-
-              <Link href={panel.href} className="kota-more">
-                <span>Find out more</span>
-                <ArrowRight className="h-4 w-4" aria-hidden="true" />
-              </Link>
-            </div>
-
-            <div className="kota-panel__visual">
-              <Image
-                src={panel.image}
-                alt={panel.imageAlt}
-                fill
-                sizes="(max-width: 768px) 100vw, 42vw"
-                className="kota-panel__image"
-              />
-            </div>
+              <div className="kota-panel__visual">
+                <Image
+                  src={panel.image}
+                  alt={panel.imageAlt}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 42vw"
+                  className="kota-panel__image"
+                />
+              </div>
+            </SlideSheet>
           </article>
         ))}
       </div>

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, Quote } from "lucide-react";
 import testimonials from "@/data/testimonials.json";
+import { SlideSheet } from "@/components/SlideSheet";
 
 export function SuccessStories() {
   const [active, setActive] = useState(0);
@@ -41,6 +42,7 @@ export function SuccessStories() {
       <div className="premium-stories__glow" aria-hidden="true" />
       <div className="premium-stories__grain" aria-hidden="true" />
 
+      <SlideSheet className="slide-panel__sheet--dark">
       <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 md:py-28 lg:px-8">
         <div className="mx-auto max-w-3xl text-center">
           <p className="premium-stories__kicker">Success Stories</p>
@@ -151,6 +153,7 @@ export function SuccessStories() {
           ))}
         </div>
       </div>
+      </SlideSheet>
     </section>
   );
 }

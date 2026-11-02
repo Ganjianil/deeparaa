@@ -6,11 +6,14 @@ import { OnboardingSteps } from "@/components/OnboardingSteps";
 import { PlatformsTools } from "@/components/PlatformsTools";
 import { ServicesGrid } from "@/components/ServicesGrid";
 import { SuccessStories } from "@/components/SuccessStories";
+import { SlideSheet } from "@/components/SlideSheet";
+import { MobilePageSnap } from "@/components/MobilePageSnap";
 import Link from "next/link";
 
 export default function HomePage() {
   return (
     <>
+      <MobilePageSnap />
       <Hero />
 
       {/* KOTA-style: fixed mesh stays while content scrolls over it */}
@@ -29,7 +32,7 @@ export default function HomePage() {
       <SuccessStories />
 
       <section
-        className="slide-panel relative isolate overflow-hidden py-16 sm:py-20 md:py-24"
+        className="slide-panel isolate overflow-hidden py-16 sm:py-20 md:py-24"
         style={{
           ["--slide-z" as string]: 10,
           background:
@@ -43,6 +46,7 @@ export default function HomePage() {
           style={{ background: "var(--brand-300)" }}
         />
 
+        <SlideSheet className="slide-panel__sheet--dark">
         <div className="mx-auto max-w-4xl px-4 text-center sm:px-6">
           <span
             className="inline-flex items-center px-4 py-2 text-sm font-semibold"
@@ -106,6 +110,7 @@ export default function HomePage() {
             Website Design · Digital Marketing · Software Development
           </p>
         </div>
+        </SlideSheet>
       </section>
     </>
   );

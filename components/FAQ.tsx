@@ -3,6 +3,7 @@
 import { useId, useState } from "react";
 import { Minus, Plus } from "lucide-react";
 import faq from "@/data/faq.json";
+import { SlideSheet } from "@/components/SlideSheet";
 
 type FAQProps = {
   ids?: string[];
@@ -20,9 +21,10 @@ export function FAQ({ ids, limit }: FAQProps) {
   return (
     <section
       id="faq"
-      className="premium-faq kota-band slide-panel relative z-10"
+      className="premium-faq kota-band slide-panel z-10"
       style={{ ["--slide-z" as string]: 8 }}
     >
+      <SlideSheet>
       <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 md:py-28 lg:px-8">
         <div className="premium-faq__shell">
           <div className="premium-faq__intro">
@@ -92,6 +94,7 @@ export function FAQ({ ids, limit }: FAQProps) {
           </div>
         </div>
       </div>
+      </SlideSheet>
     </section>
   );
 }
