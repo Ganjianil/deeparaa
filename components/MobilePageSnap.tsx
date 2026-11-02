@@ -2,7 +2,6 @@
 
 import { useEffect } from "react";
 
-const MOBILE_MQ = "(max-width: 900px)";
 const ANIM_MS = 2000;
 
 function clamp(n: number, min: number, max: number) {
@@ -21,13 +20,12 @@ function layoutTop(el: HTMLElement) {
 }
 
 /**
- * Mobile full-page snap:
- * - scroll down → page slides in from bottom-right
- * - scroll up   → page slides in from top-left
+ * Full-page snap on ALL devices (phone, tablet, desktop):
+ * each scroll/swipe jumps to the next page with a bottom-right slide-in.
+ * Touch is intercepted so iOS native vertical sticky cannot replace the effect.
  */
 export function MobilePageSnap() {
   useEffect(() => {
-    const mq = window.matchMedia(MOBILE_MQ);
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
 
     let pages: HTMLElement[] = [];
@@ -36,6 +34,8 @@ export function MobilePageSnap() {
     let animating = false;
     let touchY = 0;
     let touchX = 0;
+    let touchActive = false;
+    let touchMoved = false;
     let disposed = false;
     let unlockTimer = 0;
 
@@ -60,7 +60,7 @@ export function MobilePageSnap() {
 
     const setSheet = (
       page: HTMLElement,
-      state: "from-down" | "from-up" | "to" | "reset",
+      state: "from-br" | "to" | "reset",
       withTransition: boolean,
     ) => {
       const sheet = page.querySelector<HTMLElement>(".slide-panel__sheet");
@@ -70,18 +70,11 @@ export function MobilePageSnap() {
         ? "transform 2s cubic-bezier(0.22, 0.61, 0.36, 1), opacity 1.5s ease, border-radius 2s ease, box-shadow 2s ease"
         : "none";
 
-      if (state === "from-down") {
-        // Scroll down: enter from bottom-right
+      if (state === "from-br") {
         sheet.style.transform = "translate3d(62vw, 118%, 0) scale(0.9)";
         sheet.style.opacity = "0.2";
         sheet.style.borderRadius = "1.85rem 1.85rem 0 0";
         sheet.style.boxShadow = "-32px -48px 90px rgba(17, 17, 17, 0.24)";
-      } else if (state === "from-up") {
-        // Scroll up: enter from top-left (opposite direction)
-        sheet.style.transform = "translate3d(-58vw, -110%, 0) scale(0.9)";
-        sheet.style.opacity = "0.2";
-        sheet.style.borderRadius = "0 0 1.85rem 1.85rem";
-        sheet.style.boxShadow = "32px 48px 90px rgba(17, 17, 17, 0.24)";
       } else if (state === "to") {
         sheet.style.transform = "translate3d(0, 0, 0) scale(1)";
         sheet.style.opacity = "1";
@@ -103,7 +96,7 @@ export function MobilePageSnap() {
     };
 
     const goTo = (next: number) => {
-      if (disposed || !mq.matches || reduce.matches) return;
+      if (disposed || reduce.matches) return;
       if (animating) return;
 
       measure();
@@ -114,12 +107,12 @@ export function MobilePageSnap() {
 
       animating = true;
       const target = pages[next];
-      const goingDown = next > index;
       const top = Math.max(0, tops[next] ?? layoutTop(target));
       const hasSheet = Boolean(target.querySelector(".slide-panel__sheet"));
 
+      // All devices / both directions: bottom-right entrance
       if (hasSheet) {
-        setSheet(target, goingDown ? "from-down" : "from-up", false);
+        setSheet(target, "from-br", false);
         void target.offsetWidth;
       }
 
@@ -129,7 +122,6 @@ export function MobilePageSnap() {
       unlockTimer = window.setTimeout(() => {
         requestAnimationFrame(() => {
           if (hasSheet) setSheet(target, "to", true);
-          // Hero / pages without sheet unlock sooner
           const wait = hasSheet ? ANIM_MS : 180;
           unlockTimer = window.setTimeout(() => unlock(next), wait);
         });
@@ -151,7 +143,7 @@ export function MobilePageSnap() {
     };
 
     const onWheel = (event: WheelEvent) => {
-      if (!mq.matches || reduce.matches) return;
+      if (reduce.matches) return;
       if (Math.abs(event.deltaY) < 6) return;
 
       const sheet = (event.target as HTMLElement | null)?.closest?.(
@@ -169,18 +161,47 @@ export function MobilePageSnap() {
     };
 
     const onTouchStart = (event: TouchEvent) => {
+      if (reduce.matches) return;
+      touchActive = true;
+      touchMoved = false;
       touchY = event.touches[0]?.clientY ?? 0;
       touchX = event.touches[0]?.clientX ?? 0;
     };
 
+    const onTouchMove = (event: TouchEvent) => {
+      if (reduce.matches || !touchActive) return;
+
+      const y = event.touches[0]?.clientY ?? touchY;
+      const x = event.touches[0]?.clientX ?? touchX;
+      const deltaY = touchY - y;
+      const deltaX = touchX - x;
+
+      if (Math.abs(deltaY) < 10 && Math.abs(deltaX) < 10) return;
+      touchMoved = true;
+
+      const sheet = (event.target as HTMLElement | null)?.closest?.(
+        ".slide-panel__sheet",
+      ) as HTMLElement | null;
+      if (sheet && sheetBlocksPageSwipe(sheet, deltaY)) return;
+
+      if (Math.abs(deltaY) >= Math.abs(deltaX)) {
+        event.preventDefault();
+      }
+    };
+
     const onTouchEnd = (event: TouchEvent) => {
-      if (!mq.matches || reduce.matches || animating) return;
+      if (reduce.matches) return;
+      const wasActive = touchActive;
+      touchActive = false;
+      if (!wasActive || animating) return;
+
       const endY = event.changedTouches[0]?.clientY ?? touchY;
       const endX = event.changedTouches[0]?.clientX ?? touchX;
       const deltaY = touchY - endY;
       const deltaX = touchX - endX;
 
-      if (Math.abs(deltaY) < 56 || Math.abs(deltaY) < Math.abs(deltaX) * 1.15) {
+      if (!touchMoved) return;
+      if (Math.abs(deltaY) < 40 || Math.abs(deltaY) < Math.abs(deltaX) * 1.05) {
         return;
       }
 
@@ -196,7 +217,7 @@ export function MobilePageSnap() {
     };
 
     const onKey = (event: KeyboardEvent) => {
-      if (!mq.matches || reduce.matches || animating) return;
+      if (reduce.matches || animating) return;
       if (event.key === "ArrowDown" || event.key === "PageDown") {
         event.preventDefault();
         goTo(index + 1);
@@ -211,12 +232,18 @@ export function MobilePageSnap() {
       measure();
       index = nearestIndex();
       pages.forEach((page) => setSheet(page, "to", false));
+      if (!reduce.matches) {
+        document.documentElement.classList.add("page-snap-on");
+      } else {
+        document.documentElement.classList.remove("page-snap-on");
+      }
     };
 
-    const onMq = () => {
-      if (!mq.matches) {
+    const onReduce = () => {
+      if (reduce.matches) {
         pages.forEach((page) => setSheet(page, "reset", false));
         animating = false;
+        document.documentElement.classList.remove("page-snap-on");
       } else {
         boot();
       }
@@ -225,20 +252,25 @@ export function MobilePageSnap() {
     boot();
     window.addEventListener("wheel", onWheel, { passive: false });
     window.addEventListener("touchstart", onTouchStart, { passive: true });
+    window.addEventListener("touchmove", onTouchMove, { passive: false });
     window.addEventListener("touchend", onTouchEnd, { passive: true });
+    window.addEventListener("touchcancel", onTouchEnd, { passive: true });
     window.addEventListener("keydown", onKey);
     window.addEventListener("resize", measure);
-    mq.addEventListener("change", onMq);
+    reduce.addEventListener("change", onReduce);
 
     return () => {
       disposed = true;
       window.clearTimeout(unlockTimer);
       window.removeEventListener("wheel", onWheel);
       window.removeEventListener("touchstart", onTouchStart);
+      window.removeEventListener("touchmove", onTouchMove);
       window.removeEventListener("touchend", onTouchEnd);
+      window.removeEventListener("touchcancel", onTouchEnd);
       window.removeEventListener("keydown", onKey);
       window.removeEventListener("resize", measure);
-      mq.removeEventListener("change", onMq);
+      reduce.removeEventListener("change", onReduce);
+      document.documentElement.classList.remove("page-snap-on");
       pages.forEach((page) => setSheet(page, "reset", false));
     };
   }, []);

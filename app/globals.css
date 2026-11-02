@@ -2979,165 +2979,182 @@ main button.rounded-full[class*="bg-"] {
 }
 
 /* --------------------------------------------------------------------------
-   Full-page mobile slides: sticky pin + JS sheet from BOTTOM-RIGHT
-   (LAST so it beats position:relative). No CSS view() — sticky breaks it.
+   Full-page slides on ALL devices: sticky pin + JS sheet from BOTTOM-RIGHT
+   (LAST so it beats position:relative).
    -------------------------------------------------------------------------- */
-@media (max-width: 900px) {
-  .slide-panel,
-  .kota-panel.slide-panel,
-  section.slide-panel,
-  article.slide-panel {
-    position: sticky !important;
-    top: 0 !important;
-    z-index: var(--slide-z, 1);
-    width: 100%;
-    height: 100svh !important;
-    min-height: 100svh !important;
-    max-height: 100svh !important;
-    display: flex;
-    flex-direction: column;
-    justify-content: stretch;
-    box-sizing: border-box;
-    background: transparent;
-    overflow: hidden;
-  }
+.slide-panel,
+.kota-panel.slide-panel,
+section.slide-panel,
+article.slide-panel {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: var(--slide-z, 1);
+  width: 100%;
+  height: 100svh !important;
+  min-height: 100svh !important;
+  max-height: 100svh !important;
+  display: flex;
+  flex-direction: column;
+  justify-content: stretch;
+  box-sizing: border-box;
+  background: transparent;
+  overflow: hidden;
+}
 
-  .slide-panel--intro {
-    justify-content: center;
-  }
+.slide-panel--intro {
+  justify-content: center;
+}
 
-  .slide-panel__sheet {
-    width: 100%;
-    height: 100%;
-    min-height: 100%;
-    max-height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    box-sizing: border-box;
-    overflow-x: hidden;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
-    background: #efefef;
-    box-shadow:
-      -16px -24px 56px rgba(17, 17, 17, 0.14),
-      0 0 0 1px rgba(17, 17, 17, 0.05);
-    transform-origin: 100% 100%;
-    will-change: transform, opacity;
-    transform: translate3d(0, 0, 0);
-    opacity: 1;
-  }
+.slide-panel__sheet {
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  background: #efefef;
+  box-shadow:
+    -16px -24px 56px rgba(17, 17, 17, 0.14),
+    0 0 0 1px rgba(17, 17, 17, 0.05);
+  transform-origin: 100% 100%;
+  will-change: transform, opacity;
+  transform: translate3d(0, 0, 0);
+  opacity: 1;
+}
 
-  .slide-panel__sheet--intro {
-    background: #efefef;
-    justify-content: flex-end;
-    padding-bottom: 2rem;
-  }
+.slide-panel__sheet--intro {
+  background: #efefef;
+  justify-content: flex-end;
+  padding-bottom: 2rem;
+}
 
-  .slide-panel__sheet--dark {
-    background: transparent;
-    box-shadow: none;
-  }
+.slide-panel__sheet--dark {
+  background: transparent;
+  box-shadow: none;
+}
 
-  .kota-panels.slide-stack {
-    gap: 0 !important;
-    margin: 0 !important;
-  }
+.kota-panels.slide-stack {
+  gap: 0 !important;
+  margin: 0 !important;
+}
 
-  .kota-panel.slide-panel {
-    padding: 0;
-    animation: none !important;
-    will-change: auto;
-  }
+.kota-panel.slide-panel {
+  padding: 0;
+  animation: none !important;
+  will-change: auto;
+}
 
+.kota-panel.slide-panel .slide-panel__sheet {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 0.85rem;
+  padding: 1.1rem 1.1rem calc(1.1rem + env(safe-area-inset-bottom, 0px));
+  justify-content: space-between;
+  background: #fff;
+}
+
+@media (min-width: 901px) {
   .kota-panel.slide-panel .slide-panel__sheet {
-    display: flex;
-    flex-direction: column-reverse;
-    gap: 0.85rem;
-    padding: 1.1rem 1.1rem calc(1.1rem + env(safe-area-inset-bottom, 0px));
+    flex-direction: row;
+    align-items: center;
+    gap: 2rem;
+    padding: 2.5rem 4vw;
     justify-content: space-between;
-    background: #fff;
-  }
-
-  .kota-panel.slide-panel .kota-panel__visual {
-    aspect-ratio: 16 / 11;
-    max-height: min(38svh, 280px);
-    flex: 0 0 auto;
   }
 
   .kota-panel.slide-panel .kota-panel__content {
-    flex: 1 1 auto;
-    min-height: 0;
-    gap: 0.75rem;
+    width: 52%;
   }
 
-  .kota-panel.slide-panel .kota-panel__title {
-    font-size: clamp(1.55rem, 6.2vw, 2.1rem);
-  }
-
-  .kota-panel.slide-panel .kota-panel__text {
-    font-size: 0.92rem;
-    line-height: 1.55;
-    display: -webkit-box;
-    -webkit-line-clamp: 4;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  .kota-panel.slide-panel::before {
-    display: none;
-  }
-
-  .premium-onboarding.slide-panel .slide-panel__sheet,
-  .premium-clients.slide-panel .slide-panel__sheet,
-  .premium-tools.slide-panel .slide-panel__sheet,
-  .premium-faq.slide-panel .slide-panel__sheet {
-    justify-content: flex-start;
-    padding-block: 0;
-  }
-
-  .premium-onboarding.slide-panel,
-  .premium-clients.slide-panel,
-  .premium-tools.slide-panel,
-  .premium-faq.slide-panel {
-    background: transparent;
-  }
-
-  .premium-stories.slide-panel {
-    background:
-      radial-gradient(120% 80% at 10% -10%, rgba(255, 255, 255, 0.08), transparent 55%),
-      linear-gradient(160deg, var(--brand-950, #061824), var(--brand-900) 45%, #0a2a3d);
-  }
-
-  .slide-panel .mx-auto.max-w-7xl,
-  .slide-panel .mx-auto.max-w-4xl {
-    padding-top: 1.25rem !important;
-    padding-bottom: 1.25rem !important;
-  }
-
-  [data-theme="dark"] .slide-panel__sheet {
-    background: #121212;
-    box-shadow:
-      -16px -24px 56px rgba(0, 0, 0, 0.5),
-      0 0 0 1px rgba(255, 255, 255, 0.05);
-  }
-
-  [data-theme="dark"] .kota-panel.slide-panel .slide-panel__sheet {
-    background: #1a1a1a;
-  }
-
-  [data-theme="dark"] .slide-panel__sheet--intro {
-    background: #121212;
-  }
-
-  [data-theme="dark"] .slide-panel__sheet--dark {
-    background: transparent;
-    box-shadow: none;
+  .kota-panel.slide-panel .kota-panel__visual {
+    width: 42%;
+    max-height: min(58svh, 420px);
   }
 }
 
-@media (max-width: 900px) and (prefers-reduced-motion: reduce) {
+.kota-panel.slide-panel .kota-panel__visual {
+  aspect-ratio: 16 / 11;
+  max-height: min(38svh, 280px);
+  flex: 0 0 auto;
+}
+
+.kota-panel.slide-panel .kota-panel__content {
+  flex: 1 1 auto;
+  min-height: 0;
+  gap: 0.75rem;
+}
+
+.kota-panel.slide-panel .kota-panel__title {
+  font-size: clamp(1.55rem, 6.2vw, 2.1rem);
+}
+
+.kota-panel.slide-panel .kota-panel__text {
+  font-size: 0.92rem;
+  line-height: 1.55;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.kota-panel.slide-panel::before {
+  display: none;
+}
+
+.premium-onboarding.slide-panel .slide-panel__sheet,
+.premium-clients.slide-panel .slide-panel__sheet,
+.premium-tools.slide-panel .slide-panel__sheet,
+.premium-faq.slide-panel .slide-panel__sheet {
+  justify-content: flex-start;
+  padding-block: 0;
+}
+
+.premium-onboarding.slide-panel,
+.premium-clients.slide-panel,
+.premium-tools.slide-panel,
+.premium-faq.slide-panel {
+  background: transparent;
+}
+
+.premium-stories.slide-panel {
+  background:
+    radial-gradient(120% 80% at 10% -10%, rgba(255, 255, 255, 0.08), transparent 55%),
+    linear-gradient(160deg, var(--brand-950, #061824), var(--brand-900) 45%, #0a2a3d);
+}
+
+.slide-panel .mx-auto.max-w-7xl,
+.slide-panel .mx-auto.max-w-4xl {
+  padding-top: 1.25rem !important;
+  padding-bottom: 1.25rem !important;
+}
+
+[data-theme="dark"] .slide-panel__sheet {
+  background: #121212;
+  box-shadow:
+    -16px -24px 56px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .kota-panel.slide-panel .slide-panel__sheet {
+  background: #1a1a1a;
+}
+
+[data-theme="dark"] .slide-panel__sheet--intro {
+  background: #121212;
+}
+
+[data-theme="dark"] .slide-panel__sheet--dark {
+  background: transparent;
+  box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
   .slide-panel,
   .kota-panel.slide-panel,
   section.slide-panel,
