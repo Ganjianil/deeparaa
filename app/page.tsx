@@ -7,13 +7,11 @@ import { PlatformsTools } from "@/components/PlatformsTools";
 import { ServicesGrid } from "@/components/ServicesGrid";
 import { SuccessStories } from "@/components/SuccessStories";
 import { SlideSheet } from "@/components/SlideSheet";
-import { MobilePageSnap } from "@/components/MobilePageSnap";
 import Link from "next/link";
 
 export default function HomePage() {
   return (
     <>
-      <MobilePageSnap />
       <Hero />
 
       {/* KOTA-style: fixed mesh stays while content scrolls over it */}

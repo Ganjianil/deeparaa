@@ -7,10 +7,7 @@ type SlideSheetProps = {
   className?: string;
 };
 
-/**
- * Full-page sheet markup. Motion is driven by MobilePageSnap on mobile
- * (fast bottom-right page transitions).
- */
+/** Section content wrapper — normal document flow (no flip / snap). */
 export function SlideSheet({ children, className = "" }: SlideSheetProps) {
   return (
     <div className={`slide-panel__sheet ${className}`.trim()}>{children}</div>
