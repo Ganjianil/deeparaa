@@ -1,84 +1,76 @@
 "use client";
 
+import {
+  Code2,
+  Monitor,
+  Search,
+  ShoppingCart,
+  Smartphone,
+  Sparkles,
+  TrendingUp,
+  Video,
+  type LucideIcon,
+} from "lucide-react";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 
 type NetworkPoint = {
   x: number;
   y: number;
-  label?: string;
-  anchor?: "start" | "middle" | "end";
+  label: string;
+  Icon: LucideIcon;
 };
 
-const points: NetworkPoint[] = [
-  { x: 120, y: 160, label: "Website", anchor: "start" },
-  { x: 310, y: 90, label: "Brand", anchor: "middle" },
-  { x: 520, y: 140, label: "Ecommerce", anchor: "start" },
-  { x: 760, y: 100, label: "SEO", anchor: "middle" },
-  { x: 980, y: 150, label: "AEO", anchor: "middle" },
-  { x: 1200, y: 120, label: "Apps", anchor: "end" },
-  { x: 1320, y: 280, label: "Mobile", anchor: "end" },
-  { x: 1260, y: 460, label: "Software", anchor: "end" },
-  { x: 1100, y: 600, label: "Ads", anchor: "end" },
-  { x: 820, y: 660, label: "YouTube", anchor: "middle" },
-  { x: 540, y: 640, label: "Social", anchor: "middle" },
-  { x: 280, y: 580, label: "Growth", anchor: "start" },
-  { x: 140, y: 400, label: "Video", anchor: "start" },
-  { x: 360, y: 300 },
-  { x: 600, y: 280 },
-  { x: 860, y: 320 },
-  { x: 1040, y: 380 },
-  { x: 700, y: 480 },
-  { x: 460, y: 450 },
-  { x: 240, y: 260 },
+/**
+ * Reference (ABDM) format: 8 primary icon+label nodes in a ring around center,
+ * thin grey mesh lines, cursor becomes a temporary vertex (V / fan links).
+ */
+const CX = 720;
+const CY = 360;
+const RING_R = 265;
+
+function ringPoint(index: number, total: number, radius = RING_R) {
+  // Start near top-left, clockwise — matches ABDM octagon feel
+  const angle = -Math.PI * 0.72 + (index / total) * Math.PI * 2;
+  return {
+    x: CX + Math.cos(angle) * radius,
+    y: CY + Math.sin(angle) * radius,
+  };
+}
+
+const nodeMeta: { label: string; Icon: LucideIcon }[] = [
+  { label: "WEBSITE", Icon: Monitor },
+  { label: "APPS", Icon: Smartphone },
+  { label: "ECOMMERCE", Icon: ShoppingCart },
+  { label: "SEO", Icon: Search },
+  { label: "MARKETING", Icon: TrendingUp },
+  { label: "SOFTWARE", Icon: Code2 },
+  { label: "VIDEO", Icon: Video },
+  { label: "GROWTH", Icon: Sparkles },
 ];
 
-const staticEdges = [
-  [0, 1],
-  [1, 2],
-  [2, 3],
-  [3, 4],
-  [4, 5],
-  [5, 6],
-  [6, 7],
-  [7, 8],
-  [8, 9],
-  [9, 10],
-  [10, 11],
-  [11, 12],
-  [12, 0],
-  [0, 19],
-  [19, 13],
-  [13, 2],
-  [2, 14],
-  [14, 3],
-  [3, 15],
-  [15, 4],
-  [4, 16],
-  [16, 6],
-  [16, 7],
-  [15, 17],
-  [17, 9],
-  [14, 18],
-  [18, 11],
-  [13, 18],
-  [18, 17],
-  [12, 19],
-  [1, 19],
-  [10, 17],
-] as const;
+const points: NetworkPoint[] = nodeMeta.map((meta, index) => {
+  const pos = ringPoint(index, nodeMeta.length);
+  return { ...pos, ...meta };
+});
 
-const travelRoute = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 0] as const;
-const TRAVEL_DURATION = 18;
-/** Nodes within this SVG distance draw a line into the cursor (V / fan). */
-const CURSOR_LINK_RADIUS = 260;
-const MAX_CURSOR_LINKS = 5;
+/** Ring edges + spokes to center + every-second chords (ABDM mesh density) */
+const staticEdges: [number, number][] = [];
+for (let i = 0; i < points.length; i++) {
+  staticEdges.push([i, (i + 1) % points.length]);
+  staticEdges.push([i, (i + 2) % points.length]);
+}
+
+const travelRoute = [0, 1, 2, 3, 4, 5, 6, 7, 0] as const;
+const TRAVEL_DURATION = 16;
+const CURSOR_LINK_RADIUS = 280;
+const MAX_CURSOR_LINKS = 3;
 
 export function NetworkWeb() {
   const wrapRef = useRef<HTMLDivElement>(null);
   const reactId = useId().replace(/:/g, "");
   const [reduceMotion, setReduceMotion] = useState(false);
   const [activeHop, setActiveHop] = useState(0);
-  const [cursor, setCursor] = useState({ x: 720, y: 380, active: false });
+  const [cursor, setCursor] = useState({ x: CX, y: CY, active: false });
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -110,8 +102,7 @@ export function NetworkWeb() {
     };
 
     const onMove = (event: PointerEvent) => {
-      const next = toSvgPoint(event.clientX, event.clientY);
-      setCursor({ ...next, active: true });
+      setCursor({ ...toSvgPoint(event.clientX, event.clientY), active: true });
     };
     const onLeave = () => setCursor((prev) => ({ ...prev, active: false }));
 
@@ -140,7 +131,6 @@ export function NetworkWeb() {
   const pathId = `network-travel-${reactId}`;
   const glowId = `network-glow-${reactId}`;
 
-  /** Closest nodes → cursor: these lines form the moving V / fan. */
   const cursorLinks = useMemo(() => {
     if (!cursor.active) return [] as { index: number; dist: number }[];
     return points
@@ -169,18 +159,28 @@ export function NetworkWeb() {
         <defs>
           <path id={pathId} d={travelPath} />
           <radialGradient id={glowId} cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.32" />
-            <stop offset="40%" stopColor="var(--accent)" stopOpacity="0.12" />
+            <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.3" />
+            <stop offset="42%" stopColor="var(--accent)" stopOpacity="0.1" />
             <stop offset="100%" stopColor="var(--accent)" stopOpacity="0" />
           </radialGradient>
         </defs>
+
+        {/* Faint hub spokes — same ring→center format as reference */}
+        <g className="network-web__spokes">
+          {points.map((point, index) => (
+            <path
+              key={`spoke-${index}`}
+              d={`M${CX} ${CY} L${point.x} ${point.y}`}
+            />
+          ))}
+        </g>
 
         {cursor.active && !reduceMotion ? (
           <circle
             className="network-web__cursor-glow"
             cx={cursor.x}
             cy={cursor.y}
-            r={170}
+            r={160}
             fill={`url(#${glowId})`}
           />
         ) : null}
@@ -204,7 +204,6 @@ export function NetworkWeb() {
           })}
         </g>
 
-        {/* Cursor as temporary vertex — lines converge into a V / fan */}
         {cursor.active && cursorLinks.length > 0 ? (
           <g className="network-web__cursor-links">
             {cursorLinks.map(({ index, dist }) => {
@@ -215,7 +214,7 @@ export function NetworkWeb() {
                   key={`cursor-link-${index}`}
                   className="network-web__cursor-link"
                   d={`M${point.x} ${point.y} L${cursor.x} ${cursor.y}`}
-                  style={{ opacity: 0.35 + strength * 0.65 }}
+                  style={{ opacity: 0.4 + strength * 0.6 }}
                 />
               );
             })}
@@ -223,7 +222,7 @@ export function NetworkWeb() {
               className="network-web__cursor-node"
               cx={cursor.x}
               cy={cursor.y}
-              r={4.5}
+              r={4}
             />
           </g>
         ) : null}
@@ -251,8 +250,7 @@ export function NetworkWeb() {
                 fill="freeze"
               />
             </path>
-
-            <circle className="network-web__particle" r="3.5">
+            <circle className="network-web__particle" r="3.25">
               <animateMotion
                 dur={`${TRAVEL_DURATION}s`}
                 repeatCount="indefinite"
@@ -264,44 +262,33 @@ export function NetworkWeb() {
           </g>
         )}
 
+        {/* Center hub (reference has emblem; we keep a quiet core) */}
+        <circle className="network-web__hub" cx={CX} cy={CY} r={5} />
+
         <g>
           {points.map((point, index) => {
             const isLive = index === from || index === to;
             const isNear = nearIndexes.has(index);
             const lit = isLive || isNear;
+            const Icon = point.Icon;
             return (
-              <g key={`${point.x}-${point.y}-${index}`}>
+              <g
+                key={point.label}
+                className={`network-web__point${lit ? " network-web__point--live" : ""}`}
+                transform={`translate(${point.x} ${point.y})`}
+              >
                 {lit ? (
-                  <circle
-                    className="network-web__node-halo"
-                    cx={point.x}
-                    cy={point.y}
-                    r={point.label ? 16 : 12}
-                  />
+                  <circle className="network-web__node-halo" cx={0} cy={0} r={28} />
                 ) : null}
-                <circle
-                  className={`network-web__node${lit ? " network-web__node--live" : ""}`}
-                  cx={point.x}
-                  cy={point.y}
-                  r={point.label ? 5 : 3.25}
-                />
-                {point.label ? (
-                  <text
-                    className={`network-web__label${lit ? " network-web__label--live" : ""}`}
-                    x={
-                      point.x +
-                      (point.anchor === "end"
-                        ? -12
-                        : point.anchor === "middle"
-                          ? 0
-                          : 12)
-                    }
-                    y={point.y - 14}
-                    textAnchor={point.anchor ?? "middle"}
-                  >
-                    {point.label}
-                  </text>
-                ) : null}
+                <circle className="network-web__node-disc" cx={0} cy={0} r={18} />
+                <foreignObject x={-11} y={-11} width={22} height={22}>
+                  <div className="network-web__icon">
+                    <Icon size={16} strokeWidth={1.75} />
+                  </div>
+                </foreignObject>
+                <text className="network-web__label" x={0} y={34} textAnchor="middle">
+                  {point.label}
+                </text>
               </g>
             );
           })}

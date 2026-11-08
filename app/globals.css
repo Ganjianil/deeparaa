@@ -525,6 +525,70 @@
   filter: drop-shadow(0 0 8px color-mix(in srgb, var(--accent) 70%, transparent));
 }
 
+.network-web__spokes path {
+  stroke: color-mix(in srgb, var(--accent) 10%, #9aa4b2 50%);
+  stroke-width: 0.75;
+  opacity: 0.35;
+  fill: none;
+}
+
+[data-theme="light"] .network-web__spokes path {
+  stroke: #b0b8c4;
+  opacity: 0.4;
+}
+
+.network-web__hub {
+  fill: color-mix(in srgb, var(--accent) 35%, #fff);
+  stroke: color-mix(in srgb, var(--accent) 25%, #94a3b8);
+  stroke-width: 1.2;
+  opacity: 0.55;
+}
+
+.network-web__point {
+  transition: opacity 180ms ease;
+}
+
+.network-web__node-disc {
+  fill: #fff;
+  stroke: #c5ccd6;
+  stroke-width: 1.25;
+}
+
+[data-theme="dark"] .network-web__node-disc {
+  fill: var(--surface);
+  stroke: color-mix(in srgb, var(--accent) 30%, #64748b);
+}
+
+.network-web__point--live .network-web__node-disc {
+  stroke: var(--accent);
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--accent) 45%, transparent));
+}
+
+.network-web__icon {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  color: #7b8494;
+}
+
+.network-web__point--live .network-web__icon {
+  color: var(--accent);
+}
+
+.network-web__label {
+  fill: #8b95a5;
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.network-web__point--live .network-web__label {
+  fill: var(--accent);
+}
+
 .network-web__lines path {
   stroke: color-mix(in srgb, var(--accent) 14%, #9aa4b2 40%);
   stroke-width: 0.9;
@@ -588,19 +652,6 @@
   filter: drop-shadow(0 0 8px color-mix(in srgb, var(--accent) 60%, transparent));
 }
 
-.network-web__label {
-  fill: color-mix(in srgb, var(--text-faint) 88%, var(--accent));
-  font-family: var(--font-sans);
-  font-size: 11.5px;
-  font-weight: 500;
-  letter-spacing: 0.01em;
-  transition: fill 180ms ease;
-}
-
-.network-web__label--live {
-  fill: var(--accent);
-  font-weight: 600;
-}
 
 @media (width <= 768px) {
   .landing-hero {
@@ -700,7 +751,12 @@
   }
 
   .network-web__label {
-    display: none;
+    font-size: 8px;
+    letter-spacing: 0.04em;
+  }
+
+  .network-web__node-disc {
+    r: 14px;
   }
 
   .network-web__particle {
