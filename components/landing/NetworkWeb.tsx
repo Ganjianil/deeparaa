@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 
 type NetworkPoint = {
   x: number;
@@ -9,20 +9,30 @@ type NetworkPoint = {
   anchor?: "start" | "middle" | "end";
 };
 
+/** ABDM-style constellation — labels map to Deepara services */
 const points: NetworkPoint[] = [
-  { x: 160, y: 180, label: "Website", anchor: "start" },
-  { x: 420, y: 120, label: "Ecommerce", anchor: "start" },
-  { x: 700, y: 150, label: "SEO", anchor: "middle" },
-  { x: 980, y: 130, label: "Apps", anchor: "start" },
-  { x: 1240, y: 260, label: "Ads", anchor: "end" },
-  { x: 1180, y: 520, label: "Social", anchor: "end" },
-  { x: 760, y: 620, label: "Growth", anchor: "middle" },
-  { x: 320, y: 540 },
-  { x: 540, y: 360 },
-  { x: 880, y: 390 },
+  { x: 120, y: 160, label: "Website", anchor: "start" },
+  { x: 310, y: 90, label: "Brand", anchor: "middle" },
+  { x: 520, y: 140, label: "Ecommerce", anchor: "start" },
+  { x: 760, y: 100, label: "SEO", anchor: "middle" },
+  { x: 980, y: 150, label: "AEO", anchor: "middle" },
+  { x: 1200, y: 120, label: "Apps", anchor: "end" },
+  { x: 1320, y: 280, label: "Mobile", anchor: "end" },
+  { x: 1260, y: 460, label: "Software", anchor: "end" },
+  { x: 1100, y: 600, label: "Ads", anchor: "end" },
+  { x: 820, y: 660, label: "YouTube", anchor: "middle" },
+  { x: 540, y: 640, label: "Social", anchor: "middle" },
+  { x: 280, y: 580, label: "Growth", anchor: "start" },
+  { x: 140, y: 400, label: "Video", anchor: "start" },
+  { x: 360, y: 300 },
+  { x: 600, y: 280 },
+  { x: 860, y: 320 },
+  { x: 1040, y: 380 },
+  { x: 700, y: 480 },
+  { x: 460, y: 450 },
+  { x: 240, y: 260 },
 ];
 
-/** Quiet background links (no motion) */
 const staticEdges = [
   [0, 1],
   [1, 2],
@@ -31,23 +41,43 @@ const staticEdges = [
   [4, 5],
   [5, 6],
   [6, 7],
-  [7, 0],
-  [0, 8],
-  [8, 2],
-  [2, 9],
-  [9, 4],
+  [7, 8],
   [8, 9],
-  [7, 6],
+  [9, 10],
+  [10, 11],
+  [11, 12],
+  [12, 0],
+  [0, 19],
+  [19, 13],
+  [13, 2],
+  [2, 14],
+  [14, 3],
+  [3, 15],
+  [15, 4],
+  [4, 16],
+  [16, 6],
+  [16, 7],
+  [15, 17],
+  [17, 9],
+  [14, 18],
+  [18, 11],
+  [13, 18],
+  [18, 17],
+  [12, 19],
+  [1, 19],
+  [10, 17],
 ] as const;
 
-/** Single travel route: one node → next → next … */
-const travelRoute = [0, 1, 2, 3, 4, 5, 6, 7, 0] as const;
-const TRAVEL_DURATION = 14;
+const travelRoute = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 0] as const;
+const TRAVEL_DURATION = 18;
+const HOVER_RADIUS = 120;
 
 export function NetworkWeb() {
+  const wrapRef = useRef<HTMLDivElement>(null);
   const reactId = useId().replace(/:/g, "");
   const [reduceMotion, setReduceMotion] = useState(false);
   const [activeHop, setActiveHop] = useState(0);
+  const [cursor, setCursor] = useState({ x: 720, y: 380, active: false });
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -66,6 +96,31 @@ export function NetworkWeb() {
     return () => window.clearInterval(id);
   }, [reduceMotion]);
 
+  useEffect(() => {
+    const host = wrapRef.current?.closest(".landing-hero") ?? wrapRef.current;
+    if (!host) return;
+
+    const toSvgPoint = (clientX: number, clientY: number) => {
+      const rect = host.getBoundingClientRect();
+      const x = ((clientX - rect.left) / rect.width) * 1440;
+      const y = ((clientY - rect.top) / rect.height) * 760;
+      return { x, y };
+    };
+
+    const onMove = (event: PointerEvent) => {
+      const next = toSvgPoint(event.clientX, event.clientY);
+      setCursor({ ...next, active: true });
+    };
+    const onLeave = () => setCursor((prev) => ({ ...prev, active: false }));
+
+    host.addEventListener("pointermove", onMove, { passive: true });
+    host.addEventListener("pointerleave", onLeave);
+    return () => {
+      host.removeEventListener("pointermove", onMove);
+      host.removeEventListener("pointerleave", onLeave);
+    };
+  }, []);
+
   const travelPath = useMemo(
     () =>
       travelRoute
@@ -81,9 +136,21 @@ export function NetworkWeb() {
   const to = travelRoute[activeHop + 1];
   const hopPath = `M${points[from].x} ${points[from].y} L${points[to].x} ${points[to].y}`;
   const pathId = `network-travel-${reactId}`;
+  const glowId = `network-glow-${reactId}`;
+
+  const nearIndexes = useMemo(() => {
+    if (!cursor.active) return new Set<number>();
+    const set = new Set<number>();
+    points.forEach((point, index) => {
+      const dx = point.x - cursor.x;
+      const dy = point.y - cursor.y;
+      if (Math.hypot(dx, dy) <= HOVER_RADIUS) set.add(index);
+    });
+    return set;
+  }, [cursor]);
 
   return (
-    <div className="network-web" aria-hidden="true">
+    <div ref={wrapRef} className="network-web" aria-hidden="true">
       <svg
         className="network-web__svg"
         viewBox="0 0 1440 760"
@@ -92,18 +159,38 @@ export function NetworkWeb() {
       >
         <defs>
           <path id={pathId} d={travelPath} />
+          <radialGradient id={glowId} cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.28" />
+            <stop offset="45%" stopColor="var(--accent)" stopOpacity="0.1" />
+            <stop offset="100%" stopColor="var(--accent)" stopOpacity="0" />
+          </radialGradient>
         </defs>
 
-        {/* Static network lines */}
+        {/* Soft cursor aura — matches ABDM pointer glow */}
+        {cursor.active && !reduceMotion ? (
+          <circle
+            className="network-web__cursor-glow"
+            cx={cursor.x}
+            cy={cursor.y}
+            r={150}
+            fill={`url(#${glowId})`}
+          />
+        ) : null}
+
         <g className="network-web__lines">
           {staticEdges.map(([a, b]) => {
             const isActiveHop =
               (a === from && b === to) || (a === to && b === from);
+            const isNear = nearIndexes.has(a) || nearIndexes.has(b);
             return (
               <path
                 key={`${a}-${b}`}
                 d={`M${points[a].x} ${points[a].y} L${points[b].x} ${points[b].y}`}
-                className={isActiveHop ? "network-web__line--active" : undefined}
+                className={
+                  isActiveHop || isNear
+                    ? "network-web__line--active"
+                    : undefined
+                }
               />
             );
           })}
@@ -111,7 +198,6 @@ export function NetworkWeb() {
 
         {!reduceMotion && (
           <g>
-            {/* Only the current hop lights as a moving stroke */}
             <path
               key={`hop-${activeHop}`}
               className="network-web__flow"
@@ -127,15 +213,14 @@ export function NetworkWeb() {
               />
               <animate
                 attributeName="stroke-opacity"
-                values="0;1;1;0.35"
+                values="0;1;1;0.25"
                 keyTimes="0;0.08;0.85;1"
                 dur={`${TRAVEL_DURATION / (travelRoute.length - 1)}s`}
                 fill="freeze"
               />
             </path>
 
-            {/* One particle traveling the full loop, node to node */}
-            <circle className="network-web__particle" r="4">
+            <circle className="network-web__particle" r="3.5">
               <animateMotion
                 dur={`${TRAVEL_DURATION}s`}
                 repeatCount="indefinite"
@@ -150,18 +235,35 @@ export function NetworkWeb() {
         <g>
           {points.map((point, index) => {
             const isLive = index === from || index === to;
+            const isNear = nearIndexes.has(index);
+            const lit = isLive || isNear;
             return (
               <g key={`${point.x}-${point.y}-${index}`}>
+                {lit ? (
+                  <circle
+                    className="network-web__node-halo"
+                    cx={point.x}
+                    cy={point.y}
+                    r={point.label ? 16 : 12}
+                  />
+                ) : null}
                 <circle
-                  className={`network-web__node${isLive ? " network-web__node--live" : ""}`}
+                  className={`network-web__node${lit ? " network-web__node--live" : ""}`}
                   cx={point.x}
                   cy={point.y}
-                  r={point.label ? 5 : 3.5}
+                  r={point.label ? 5 : 3.25}
                 />
                 {point.label ? (
                   <text
-                    className={`network-web__label${isLive ? " network-web__label--live" : ""}`}
-                    x={point.x + (point.anchor === "end" ? -12 : point.anchor === "middle" ? 0 : 12)}
+                    className={`network-web__label${lit ? " network-web__label--live" : ""}`}
+                    x={
+                      point.x +
+                      (point.anchor === "end"
+                        ? -12
+                        : point.anchor === "middle"
+                          ? 0
+                          : 12)
+                    }
                     y={point.y - 14}
                     textAnchor={point.anchor ?? "middle"}
                   >
