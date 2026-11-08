@@ -35,11 +35,7 @@ export function Hero() {
   }, []);
 
   return (
-    <section
-      id="home"
-      aria-labelledby="home-title"
-      className="landing-hero"
-    >
+    <section id="home" aria-labelledby="home-title" className="landing-hero">
       <NetworkWeb />
 
       <div className="landing-hero__copy">
@@ -59,7 +55,8 @@ export function Hero() {
 
         <p className="landing-hero__lede">
           Practical digital services to help your business get online, reach
-          more customers, and work smarter. Secure. Clear. Built to last.
+          more customers, and work smarter—websites, apps, and marketing with
+          clear delivery. Secure. Clear. Built to last.
         </p>
       </div>
 
@@ -72,7 +69,12 @@ export function Hero() {
           className="landing-hero__goals-list"
         >
           {goalCards.map((card) => (
-            <Link key={card.href} href={card.href} className="landing-hero__goal">
+            <Link
+              key={card.href}
+              href={card.href}
+              className="landing-hero__goal"
+              prefetch
+            >
               <span className="landing-hero__goal-intent">{card.intent}</span>
               <span className="landing-hero__goal-short">{card.short}</span>
             </Link>

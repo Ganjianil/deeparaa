@@ -17,6 +17,7 @@ export default function SoftwareDevelopmentPage() {
       heroDescription={page.heroDescription}
       features={page.features}
       faqIds={page.faqIds}
+      serviceSlug="software-development"
     />
   );
 }

@@ -9,6 +9,7 @@ import "./globals.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { Providers } from "@/components/Providers";
 import { AIChatbot } from "@/app/AIChatbot";
 
 const sourceSans = Source_Sans_3({
@@ -50,12 +51,14 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className={sourceSans.className}>
-        <ThemeProvider>
-          <Header />
-          <main style={{ paddingTop: "var(--topbar-height)" }}>{children}</main>
-          <Footer />
-          <AIChatbot />
-        </ThemeProvider>
+        <Providers>
+          <ThemeProvider>
+            <Header />
+            <main style={{ paddingTop: "var(--topbar-height)" }}>{children}</main>
+            <Footer />
+            <AIChatbot />
+          </ThemeProvider>
+        </Providers>
       </body>
     </html>
   );

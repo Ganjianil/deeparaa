@@ -2,18 +2,16 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   ArrowRight,
-  ArrowUpRight,
   CheckCircle2,
   MessageCircle,
-  Sparkles,
 } from "lucide-react";
 import { servicePages } from "@/data/servicePages";
+import { ServicePackages } from "@/components/ServicePackages";
+import { whatsappUrl } from "@/lib/contact";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
 };
-
-const WHATSAPP_NUMBER = "919985888237";
 
 export function generateStaticParams() {
   return servicePages.map((service) => ({
@@ -41,132 +39,154 @@ export default async function ServicePage({ params }: PageProps) {
 
   if (!service) notFound();
 
-  const whatsappMessage = encodeURIComponent(
+  const consultUrl = whatsappUrl(
     `Hello Deepara Solutions! I would like to know more about ${service.title}.`,
   );
 
-  const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${whatsappMessage}`;
-
   return (
-    <main className="min-h-screen bg-white text-slate-900">
-      {/* Hero */}
-      <section className="relative isolate overflow-hidden bg-slate-950 px-5 py-24 text-white sm:px-8 sm:py-32 lg:px-12">
-        <div className="absolute inset-0 -z-10 bg-gradient-to-br from-blue-950 via-slate-950 to-violet-950" />
-
-        <div className="absolute -right-24 -top-24 -z-10 h-80 w-80 rounded-full bg-blue-500/20 blur-3xl" />
-
-        <div className="absolute -bottom-32 left-1/4 -z-10 h-80 w-80 rounded-full bg-fuchsia-500/15 blur-3xl" />
-
+    <div
+      className="min-h-screen"
+      style={{
+        background:
+          "radial-gradient(ellipse 80% 45% at 50% -8%, var(--accent-wash), transparent 55%), var(--page)",
+        color: "var(--text-body)",
+      }}
+    >
+      <section className="relative overflow-hidden px-5 py-20 sm:px-8 sm:py-24 lg:px-12">
         <div className="mx-auto max-w-7xl">
           <div className="max-w-3xl">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-blue-200">
-              <Sparkles className="h-4 w-4" />
+            <p
+              className="text-xs font-semibold uppercase tracking-[0.16em]"
+              style={{ color: "var(--accent)" }}
+            >
               Deepara Solutions
-            </div>
+            </p>
 
-            <h1 className="text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl lg:text-7xl">
+            <h1
+              className="mt-4 font-serif text-4xl tracking-tight sm:text-5xl lg:text-6xl"
+              style={{ color: "var(--text-heading)", fontWeight: 400 }}
+            >
               {service.title}
             </h1>
 
-            <h2 className="mt-5 text-xl font-semibold text-blue-200 sm:text-2xl">
+            <h2
+              className="mt-4 text-xl font-semibold sm:text-2xl"
+              style={{ color: "var(--accent)" }}
+            >
               {service.subtitle}
             </h2>
 
-            <p className="mt-6 max-w-2xl text-base leading-8 text-slate-300 sm:text-lg">
+            <p
+              className="mt-6 max-w-2xl text-base leading-8 sm:text-lg"
+              style={{ color: "var(--text-muted)" }}
+            >
               {service.description}
             </p>
 
-            <div className="mt-9 flex flex-col gap-4 sm:flex-row">
+            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
               <a
-                href={whatsappUrl}
+                href={consultUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex min-h-14 items-center justify-center gap-2 rounded-full bg-[#f5790c] px-7 py-4 font-semibold text-white shadow-lg shadow-orange-950/20 transition hover:-translate-y-0.5 hover:bg-[#df6800]"
+                className="btn-accent min-h-12 px-6"
               >
-                <MessageCircle className="h-5 w-5" />
-                Get Free Consultation
-                <ArrowUpRight className="h-5 w-5" />
+                <MessageCircle className="h-4 w-4" />
+                Get free consultation
               </a>
 
-              <Link
-                href="/#contact"
-                className="inline-flex min-h-14 items-center justify-center gap-2 rounded-full border border-white/25 px-7 py-4 font-semibold text-white transition hover:bg-white/10"
-              >
-                Contact Us
-                <ArrowRight className="h-5 w-5" />
+              <Link href="/packages" className="btn-ghost min-h-12 px-6">
+                View packages
+                <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Service offerings */}
-      <section className="bg-slate-50 px-5 py-20 sm:px-8 lg:px-12 lg:py-28">
+      <section className="px-5 py-16 sm:px-8 lg:px-12 lg:py-20">
         <div className="mx-auto max-w-7xl">
-          <div className="mx-auto mb-14 max-w-3xl text-center">
-            <span className="mb-4 inline-block rounded-full bg-blue-100 px-4 py-2 text-sm font-semibold text-blue-700">
-              What We Offer
-            </span>
-
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
-              Our{" "}
-              <span className="bg-gradient-to-r from-blue-600 via-violet-600 to-fuchsia-500 bg-clip-text text-transparent">
-                {service.title}
-              </span>{" "}
-              Services
+          <div className="mx-auto mb-12 max-w-3xl text-center">
+            <p
+              className="text-xs font-semibold uppercase tracking-[0.16em]"
+              style={{ color: "var(--accent)" }}
+            >
+              What we offer
+            </p>
+            <h2
+              className="mt-3 font-serif text-3xl sm:text-4xl"
+              style={{ color: "var(--text-heading)", fontWeight: 400 }}
+            >
+              Our {service.title} services
             </h2>
-
-            <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg">
+            <p
+              className="mx-auto mt-4 max-w-2xl text-sm leading-7 sm:text-base"
+              style={{ color: "var(--text-muted)" }}
+            >
               Explore solutions tailored to your business requirements and
               digital growth goals.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {service.services.map((item, index) => (
               <article
                 key={item.title}
-                className="group relative flex flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white p-7 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:border-blue-200 hover:shadow-xl hover:shadow-blue-900/5"
+                className="flex flex-col border p-6"
+                style={{
+                  borderRadius: "var(--radius-panel)",
+                  borderColor: "var(--border)",
+                  background: "var(--surface)",
+                }}
               >
-                <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-100 via-violet-100 to-fuchsia-100 text-blue-700">
-                  <span className="text-lg font-bold">
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                </div>
-
-                <h3 className="text-xl font-bold tracking-tight text-slate-900 transition-colors group-hover:text-blue-700">
+                <span
+                  className="inline-flex h-10 w-10 items-center justify-center text-sm font-bold"
+                  style={{
+                    borderRadius: "var(--radius-control)",
+                    background: "var(--accent-soft)",
+                    color: "var(--accent)",
+                  }}
+                >
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <h3
+                  className="mt-5 font-serif text-xl"
+                  style={{ color: "var(--text-heading)", fontWeight: 400 }}
+                >
                   {item.title}
                 </h3>
-
-                <p className="mt-3 flex-1 text-sm leading-7 text-slate-600 sm:text-base">
+                <p
+                  className="mt-3 flex-1 text-sm leading-7"
+                  style={{ color: "var(--text-muted)" }}
+                >
                   {item.description}
                 </p>
-
-                <div className="mt-6 flex items-center gap-2 text-sm font-semibold text-blue-700">
-                  Learn More
-                  <ArrowUpRight className="h-4 w-4" />
-                </div>
-
-                <div className="absolute bottom-0 left-0 h-1 w-0 bg-gradient-to-r from-blue-600 via-violet-500 to-fuchsia-500 transition-all duration-500 group-hover:w-full" />
               </article>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Benefits */}
-      <section className="px-5 py-20 sm:px-8 lg:px-12 lg:py-24">
+      <ServicePackages serviceSlug={service.slug} serviceTitle={service.title} />
+
+      <section className="px-5 py-16 sm:px-8 lg:px-12 lg:py-20">
         <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-2 lg:items-center">
           <div>
-            <span className="mb-4 inline-block rounded-full bg-blue-100 px-4 py-2 text-sm font-semibold text-blue-700">
-              Why Choose Us
-            </span>
-
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            <p
+              className="text-xs font-semibold uppercase tracking-[0.16em]"
+              style={{ color: "var(--accent)" }}
+            >
+              Why choose us
+            </p>
+            <h2
+              className="mt-3 font-serif text-3xl sm:text-4xl"
+              style={{ color: "var(--text-heading)", fontWeight: 400 }}
+            >
               Solutions built around your business goals
             </h2>
-
-            <p className="mt-5 text-base leading-8 text-slate-600">
+            <p
+              className="mt-5 text-base leading-8"
+              style={{ color: "var(--text-muted)" }}
+            >
               We combine thoughtful planning, practical implementation, and
               ongoing improvement to help businesses build a stronger digital
               presence.
@@ -177,10 +197,21 @@ export default async function ServicePage({ params }: PageProps) {
             {service.benefits.map((benefit) => (
               <div
                 key={benefit}
-                className="flex gap-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+                className="flex gap-3 border p-5"
+                style={{
+                  borderRadius: "var(--radius-panel)",
+                  borderColor: "var(--border)",
+                  background: "var(--surface)",
+                }}
               >
-                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-blue-600" />
-                <p className="text-sm font-medium leading-6 text-slate-700">
+                <CheckCircle2
+                  className="mt-0.5 h-5 w-5 shrink-0"
+                  style={{ color: "var(--accent)" }}
+                />
+                <p
+                  className="text-sm font-medium leading-6"
+                  style={{ color: "var(--text-body)" }}
+                >
                   {benefit}
                 </p>
               </div>
@@ -189,39 +220,45 @@ export default async function ServicePage({ params }: PageProps) {
         </div>
       </section>
 
-      {/* FAQs */}
-      <section className="bg-slate-50 px-5 py-20 sm:px-8 lg:px-12 lg:py-24">
+      <section className="px-5 py-16 sm:px-8 lg:px-12 lg:py-20">
         <div className="mx-auto max-w-4xl">
           <div className="mb-10 text-center">
-            <span className="mb-4 inline-block rounded-full bg-blue-100 px-4 py-2 text-sm font-semibold text-blue-700">
+            <p
+              className="text-xs font-semibold uppercase tracking-[0.16em]"
+              style={{ color: "var(--accent)" }}
+            >
               FAQs
-            </span>
-
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              Frequently Asked Questions
-            </h2>
-
-            <p className="mt-4 text-slate-600">
-              Find answers to common questions about{" "}
-              {service.title.toLowerCase()}.
             </p>
+            <h2
+              className="mt-3 font-serif text-3xl sm:text-4xl"
+              style={{ color: "var(--text-heading)", fontWeight: 400 }}
+            >
+              Frequently asked questions
+            </h2>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             {service.faqs.map((faq) => (
               <details
                 key={faq.question}
-                className="group rounded-2xl border border-slate-200 bg-white p-5 open:border-blue-200 sm:p-6"
+                className="group border p-5 sm:p-6"
+                style={{
+                  borderRadius: "var(--radius-panel)",
+                  borderColor: "var(--border)",
+                  background: "var(--surface)",
+                }}
               >
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold text-slate-900">
+                <summary
+                  className="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold"
+                  style={{ color: "var(--text-heading)" }}
+                >
                   {faq.question}
-
-                  <span className="text-xl text-blue-600 transition-transform group-open:rotate-45">
-                    +
-                  </span>
+                  <span style={{ color: "var(--accent)" }}>+</span>
                 </summary>
-
-                <p className="mt-4 text-sm leading-7 text-slate-600 sm:text-base">
+                <p
+                  className="mt-4 text-sm leading-7 sm:text-base"
+                  style={{ color: "var(--text-muted)" }}
+                >
                   {faq.answer}
                 </p>
               </details>
@@ -230,29 +267,41 @@ export default async function ServicePage({ params }: PageProps) {
         </div>
       </section>
 
-      {/* Final CTA */}
-      <section className="px-5 py-20 sm:px-8 lg:px-12">
-        <div className="mx-auto max-w-7xl overflow-hidden rounded-3xl bg-gradient-to-br from-blue-700 via-violet-700 to-fuchsia-700 px-6 py-12 text-center text-white sm:px-12 sm:py-16">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            Ready to Grow Your Business?
-          </h2>
-
-          <p className="mx-auto mt-4 max-w-2xl leading-7 text-white/85">
-            Let us discuss your goals and find the right{" "}
-            {service.title.toLowerCase()} solution for your business.
-          </p>
-
+      <section className="px-5 pb-20 sm:px-8 lg:px-12">
+        <div
+          className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-6 border p-8 sm:p-10 lg:flex-row lg:items-center"
+          style={{
+            borderRadius: "var(--radius-panel)",
+            borderColor: "var(--border)",
+            background:
+              "linear-gradient(135deg, var(--accent-wash), var(--surface))",
+          }}
+        >
+          <div>
+            <h2
+              className="font-serif text-2xl sm:text-3xl"
+              style={{ color: "var(--text-heading)", fontWeight: 400 }}
+            >
+              Ready to grow your business?
+            </h2>
+            <p
+              className="mt-3 max-w-2xl text-sm leading-7"
+              style={{ color: "var(--text-muted)" }}
+            >
+              Tell us your goals and we&apos;ll recommend the right{" "}
+              {service.title.toLowerCase()} package for you.
+            </p>
+          </div>
           <a
-            href={whatsappUrl}
+            href={consultUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-8 inline-flex min-h-14 items-center justify-center gap-2 rounded-full bg-white px-7 py-4 font-semibold text-blue-700 transition hover:-translate-y-0.5 hover:bg-blue-50"
+            className="btn-accent min-h-12 shrink-0 px-6"
           >
-            Get Started Today
-            <ArrowUpRight className="h-5 w-5" />
+            Get started today
           </a>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

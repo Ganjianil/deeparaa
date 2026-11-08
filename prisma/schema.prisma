@@ -1,0 +1,75 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  phone        String   @default("")
+  passwordHash String
+  role         String   @default("USER") // USER | ADMIN
+  createdAt    DateTime @default(now())
+}
+
+model Lead {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  message   String?
+  source    String   @default("contact")
+  status    String   @default("NEW") // NEW | READ | CLOSED
+  createdAt DateTime @default(now())
+}
+
+model Package {
+  id           String   @id @default(cuid())
+  title        String
+  slug         String   @unique
+  category     String
+  description  String
+  features     String // JSON array string for SQLite
+  priceInr     Int // whole INR rupees
+  compareAt    Int? // optional strikethrough price
+  serviceSlugs String   @default("[]") // JSON array of service page slugs
+  featured     Boolean  @default(false)
+  active       Boolean  @default(true)
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Order {
+  id            String   @id @default(cuid())
+  userId        String?
+  packageId     String?
+  packageTitle  String
+  packageSlug   String?
+  priceInr      Int
+  name          String
+  email         String
+  phone         String
+  paymentMethod String   @default("COD")
+  status        String   @default("NEW") // NEW | CONFIRMED | COMPLETED | CANCELLED
+  source        String   @default("package-checkout")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Client {
+  id        String   @id @default(cuid())
+  name      String
+  initials  String
+  industry  String
+  logo      String   @default("")
+  active    Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

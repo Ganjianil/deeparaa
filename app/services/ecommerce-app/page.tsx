@@ -17,6 +17,7 @@ export default function EcommerceAppPage() {
       heroDescription={page.heroDescription}
       features={page.features}
       faqIds={page.faqIds}
+      serviceSlug="ecommerce-app"
     />
   );
 }

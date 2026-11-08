@@ -22,18 +22,26 @@ export function SplitFlapBoard({
   reduceMotion = false,
 }: SplitFlapBoardProps) {
   const target = useMemo(() => text.toUpperCase().split(""), [text]);
+
+  // Stable SSR/client first paint — never randomize during render
   const [faces, setFaces] = useState(() =>
     target.map((char) => ({
-      current: reduceMotion ? char : randomChar(char),
+      current: char,
       next: char,
       flipping: false,
     })),
   );
-  const [still, setStill] = useState(reduceMotion);
+  const [still, setStill] = useState(true);
 
   useEffect(() => {
     if (reduceMotion) {
-      setFaces(target.map((char) => ({ current: char, next: char, flipping: false })));
+      setFaces(
+        target.map((char) => ({
+          current: char,
+          next: char,
+          flipping: false,
+        })),
+      );
       setStill(true);
       return;
     }

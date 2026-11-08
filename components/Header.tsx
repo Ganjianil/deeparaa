@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTheme } from "@/components/ThemeProvider";
+import { AuthNav } from "@/components/AuthNav";
 
 const navLinks = [
   { href: "/#home", label: "Home" },
@@ -97,7 +98,7 @@ export function Header() {
     setFormError("");
   };
 
-  const handleAuditSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleAuditSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const cleanedPhone = phone.replace(/[\s()+-]/g, "");
 
@@ -145,6 +146,22 @@ export function Header() {
       "",
       "Please run a detailed search and performance audit for my brand.",
     ].join("\n");
+
+    try {
+      await fetch("/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: fullName.trim(),
+          email: email.trim(),
+          phone: phone.trim(),
+          message,
+          source: "free-audit",
+        }),
+      });
+    } catch {
+      // Still open WhatsApp even if lead storage fails
+    }
 
     window.open(
       `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`,
@@ -284,6 +301,7 @@ export function Header() {
           </nav>
 
           <div className="ml-3 hidden shrink-0 items-center gap-2 lg:flex xl:ml-6">
+            <AuthNav />
             <button
               type="button"
               className="curtain__toggle"
@@ -430,6 +448,9 @@ export function Header() {
                 {link.label}
               </Link>
             ))}
+            <div className="mt-4 space-y-3 border-t pt-4" style={{ borderColor: "var(--border)" }}>
+              <AuthNav mobile onNavigate={closeMobileMenu} />
+            </div>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               <button type="button" onClick={openAuditForm} className="btn-accent">
                 Get Free Audit

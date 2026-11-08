@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { FAQ } from "./FAQ";
+import { ServicePackages } from "@/components/ServicePackages";
 
 type Feature = {
   title: string;
@@ -12,6 +13,8 @@ type ServicePageLayoutProps = {
   heroDescription: string;
   features: Feature[];
   faqIds: string[];
+  /** Slug used to pull admin-managed packages for this page */
+  serviceSlug: string;
 };
 
 export function ServicePageLayout({
@@ -20,55 +23,78 @@ export function ServicePageLayout({
   heroDescription,
   features,
   faqIds,
+  serviceSlug,
 }: ServicePageLayoutProps) {
   return (
-    <>
-      <section
-        className="relative overflow-hidden pb-20 pt-16 md:pb-28 md:pt-24"
-        style={{
-          background:
-            "linear-gradient(145deg, var(--brand-900), var(--brand-700))",
-        }}
-      >
-        <div className="relative mx-auto max-w-7xl px-4 md:px-6 lg:px-8">
+    <div
+      style={{
+        background:
+          "radial-gradient(ellipse 80% 45% at 50% -8%, var(--accent-wash), transparent 55%), var(--page)",
+      }}
+    >
+      <section className="relative overflow-hidden px-5 pb-14 pt-16 sm:px-8 md:pb-20 md:pt-24">
+        <div className="relative mx-auto max-w-7xl">
           <Link
             href="/#services"
-            className="mb-6 inline-flex items-center text-sm text-white/65 transition hover:text-white"
+            className="mb-6 inline-flex items-center text-sm transition hover:opacity-80"
+            style={{ color: "var(--text-muted)" }}
           >
             ← Back to services
           </Link>
-          <p className="section-eyebrow mb-3" style={{ color: "var(--brand-200)" }}>
+          <p
+            className="text-xs font-semibold uppercase tracking-[0.16em]"
+            style={{ color: "var(--accent)" }}
+          >
             Service
           </p>
           <h1
-            className="mt-3 max-w-3xl font-serif text-4xl tracking-tight text-white md:text-5xl lg:text-6xl"
-            style={{ fontWeight: 400 }}
+            className="mt-3 max-w-3xl font-serif text-4xl tracking-tight md:text-5xl lg:text-6xl"
+            style={{ color: "var(--text-heading)", fontWeight: 400 }}
           >
             {title}
           </h1>
-          <p className="mt-4 max-w-2xl text-xl" style={{ color: "var(--brand-200)" }}>
+          <p
+            className="mt-4 max-w-2xl text-xl"
+            style={{ color: "var(--accent)" }}
+          >
             {tagline}
           </p>
-          <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/70">
+          <p
+            className="mt-6 max-w-2xl text-lg leading-relaxed"
+            style={{ color: "var(--text-muted)" }}
+          >
             {heroDescription}
           </p>
-          <Link href="/#contact" className="btn-accent mt-10 inline-flex">
-            Request a Consultation
-          </Link>
+          <div className="mt-10 flex flex-wrap gap-3">
+            <Link href="/#contact" className="btn-accent">
+              Request a consultation
+            </Link>
+            <Link href="/packages" className="btn-ghost">
+              View packages
+            </Link>
+          </div>
         </div>
       </section>
 
-      <section className="py-20 md:py-28" style={{ background: "var(--page)" }}>
-        <div className="mx-auto max-w-7xl px-4 md:px-6 lg:px-8">
+      <section className="pb-16 md:pb-24">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8">
           <h2
-            className="mb-12 text-center font-serif text-3xl tracking-tight md:text-4xl"
+            className="mb-10 text-center font-serif text-3xl tracking-tight md:text-4xl"
             style={{ color: "var(--text-heading)", fontWeight: 400 }}
           >
             What&apos;s included
           </h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {features.map((feature) => (
-              <article key={feature.title} className="surface-card p-6">
+              <article
+                key={feature.title}
+                className="border p-6"
+                style={{
+                  borderRadius: "var(--radius-panel)",
+                  borderColor: "var(--border)",
+                  background: "var(--surface)",
+                }}
+              >
                 <h3
                   className="font-serif text-lg tracking-tight"
                   style={{ color: "var(--text-heading)", fontWeight: 400 }}
@@ -87,7 +113,9 @@ export function ServicePageLayout({
         </div>
       </section>
 
+      <ServicePackages serviceSlug={serviceSlug} serviceTitle={title} />
+
       <FAQ ids={faqIds} />
-    </>
+    </div>
   );
 }

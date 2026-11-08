@@ -2,7 +2,9 @@
 
 import { useEffect } from "react";
 
-const ANIM_MS = 1150;
+const ANIM_MS = 950;
+/** Absorb leftover trackpad wheel ticks after a flip finishes. */
+const COOLDOWN_MS = 420;
 
 function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
@@ -20,8 +22,9 @@ function layoutTop(el: HTMLElement) {
 }
 
 /**
- * Full-page snap on ALL devices:
- * each scroll/swipe flips the next page in from the bottom-right (3D card flip).
+ * Full-page snap on ALL devices.
+ * Bottom-right corner flip on every page change (down and up).
+ * One gesture → one page (no double-flip from trackpad wheel bursts).
  */
 export function MobilePageSnap() {
   useEffect(() => {
@@ -31,6 +34,7 @@ export function MobilePageSnap() {
     let tops: number[] = [];
     let index = 0;
     let animating = false;
+    let cooldownUntil = 0;
     let touchY = 0;
     let touchX = 0;
     let touchActive = false;
@@ -49,90 +53,75 @@ export function MobilePageSnap() {
 
     const nearestIndex = () => {
       if (!tops.length) return 0;
-      const y = window.scrollY + 8;
+      const y = window.scrollY + window.innerHeight * 0.25;
       let best = 0;
+      let bestDist = Infinity;
       for (let i = 0; i < tops.length; i++) {
-        if (tops[i] <= y + window.innerHeight * 0.4) best = i;
+        const dist = Math.abs(tops[i] - (window.scrollY + 1));
+        if (dist < bestDist) {
+          bestDist = dist;
+          best = i;
+        }
+        if (tops[i] <= y) best = i;
       }
       return best;
     };
 
-    const setSheet = (
-      page: HTMLElement,
-      state: "from-br" | "to" | "reset",
-      withTransition: boolean,
-    ) => {
-      const sheet = page.querySelector<HTMLElement>(".slide-panel__sheet");
+    const sheetOf = (page: HTMLElement) =>
+      page.querySelector<HTMLElement>(".slide-panel__sheet");
+
+    const clearFlipClasses = (sheet: HTMLElement | null) => {
       if (!sheet) return;
-
-      // Flip hinge from bottom-right corner
-      sheet.style.transformOrigin = "100% 100%";
-      sheet.style.backfaceVisibility = "hidden";
-      sheet.style.webkitBackfaceVisibility = "hidden";
-
-      const parent = sheet.parentElement;
-      if (parent) {
-        parent.style.perspective = "1400px";
-        parent.style.perspectiveOrigin = "70% 80%";
-      }
-
-      sheet.style.transition = withTransition
-        ? "transform 1.15s cubic-bezier(0.22, 0.8, 0.28, 1), opacity 0.85s ease, border-radius 1.15s ease, box-shadow 1.15s ease"
-        : "none";
-
-      if (state === "from-br") {
-        // 3D flip-in from bottom-right
-        sheet.style.transform =
-          "translate3d(18vw, 22vh, 0) rotateX(58deg) rotateY(-42deg) scale(0.88)";
-        sheet.style.opacity = "0.15";
-        sheet.style.borderRadius = "1.5rem";
-        sheet.style.boxShadow = "-28px -36px 70px rgba(17, 17, 17, 0.28)";
-      } else if (state === "to") {
-        sheet.style.transform =
-          "translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg) scale(1)";
-        sheet.style.opacity = "1";
-        sheet.style.borderRadius = "0";
-        sheet.style.boxShadow = "";
-      } else {
-        sheet.style.transform = "";
-        sheet.style.opacity = "";
-        sheet.style.borderRadius = "";
-        sheet.style.boxShadow = "";
-        sheet.style.transition = "";
-        sheet.style.transformOrigin = "";
-        sheet.style.backfaceVisibility = "";
-        if (parent) {
-          parent.style.perspective = "";
-          parent.style.perspectiveOrigin = "";
-        }
-      }
+      sheet.classList.remove("is-flip-from", "is-flip-in", "is-flip-ready");
     };
+
+    const settleAll = () => {
+      pages.forEach((page) => {
+        const sheet = sheetOf(page);
+        clearFlipClasses(sheet);
+        sheet?.classList.add("is-flip-in");
+      });
+    };
+
+    const locked = () => animating || performance.now() < cooldownUntil;
 
     const unlock = (nextIndex: number) => {
       animating = false;
       index = nextIndex;
+      cooldownUntil = performance.now() + COOLDOWN_MS;
       window.clearTimeout(unlockTimer);
     };
 
     const goTo = (next: number) => {
       if (disposed || reduce.matches) return;
-      if (animating) return;
 
       measure();
       if (!pages.length) return;
 
       next = clamp(next, 0, pages.length - 1);
-      if (next === index) return;
+      if (next === index) {
+        animating = false;
+        return;
+      }
+
+      if (animating) return;
 
       animating = true;
       const target = pages[next];
       const top = Math.max(0, tops[next] ?? layoutTop(target));
-      const hasSheet = Boolean(target.querySelector(".slide-panel__sheet"));
+      const sheet = sheetOf(target);
 
-      // All devices / both directions: bottom-right entrance
-      if (hasSheet) {
-        setSheet(target, "from-br", false);
-        void target.offsetWidth;
+      pages.forEach((page) => {
+        if (page === target) return;
+        const other = sheetOf(page);
+        clearFlipClasses(other);
+        other?.classList.add("is-flip-in");
+      });
+
+      if (sheet) {
+        clearFlipClasses(sheet);
+        sheet.classList.add("is-flip-ready", "is-flip-from");
+        void sheet.offsetWidth;
       }
 
       window.scrollTo({ top, left: 0, behavior: "auto" });
@@ -140,43 +129,58 @@ export function MobilePageSnap() {
       window.clearTimeout(unlockTimer);
       unlockTimer = window.setTimeout(() => {
         requestAnimationFrame(() => {
-          if (hasSheet) setSheet(target, "to", true);
-          const wait = hasSheet ? ANIM_MS : 180;
-          unlockTimer = window.setTimeout(() => unlock(next), wait);
+          if (!sheet) {
+            unlockTimer = window.setTimeout(() => unlock(next), 120);
+            return;
+          }
+
+          sheet.classList.remove("is-flip-ready", "is-flip-from");
+          sheet.classList.add("is-flip-in");
+
+          let finished = false;
+          const finish = () => {
+            if (finished) return;
+            finished = true;
+            sheet.removeEventListener("transitionend", onEnd);
+            unlock(next);
+          };
+
+          const onEnd = (event: TransitionEvent) => {
+            if (
+              event.propertyName !== "transform" &&
+              event.propertyName !== "-webkit-transform"
+            ) {
+              return;
+            }
+            finish();
+          };
+
+          sheet.addEventListener("transitionend", onEnd);
+          unlockTimer = window.setTimeout(finish, ANIM_MS + 80);
         });
-      }, hasSheet ? 90 : 30);
+      }, 32);
     };
 
-    const sheetBlocksPageSwipe = (
-      sheet: HTMLElement,
-      deltaY: number,
-    ): boolean => {
-      const overflow = sheet.scrollHeight - sheet.clientHeight;
-      if (overflow < 48) return false;
-      const atTop = sheet.scrollTop <= 1;
-      const atBottom =
-        sheet.scrollTop + sheet.clientHeight >= sheet.scrollHeight - 1;
-      if (deltaY < 0 && !atTop) return true;
-      if (deltaY > 0 && !atBottom) return true;
-      return false;
+    const step = (dir: 1 | -1) => {
+      if (locked()) return;
+      const synced = nearestIndex();
+      if (Math.abs(synced - index) >= 1) index = synced;
+      goTo(index + dir);
     };
 
     const onWheel = (event: WheelEvent) => {
-      if (reduce.matches) return;
-      if (Math.abs(event.deltaY) < 6) return;
+      if (reduce.matches || disposed) return;
+      if (Math.abs(event.deltaY) < 8) return;
 
-      const sheet = (event.target as HTMLElement | null)?.closest?.(
-        ".slide-panel__sheet",
-      ) as HTMLElement | null;
-      if (sheet && sheetBlocksPageSwipe(sheet, event.deltaY)) return;
+      // Don't trap wheel while user interacts with links/buttons
+      const target = event.target as HTMLElement | null;
+      if (target?.closest?.("a, button, input, textarea, select")) return;
 
+      // Always consume wheel so native scroll can't fight the snap
       event.preventDefault();
-      if (animating) return;
+      if (locked()) return;
 
-      const synced = nearestIndex();
-      if (Math.abs(synced - index) > 1) index = synced;
-
-      goTo(index + (event.deltaY > 0 ? 1 : -1));
+      step(event.deltaY > 0 ? 1 : -1);
     };
 
     const onTouchStart = (event: TouchEvent) => {
@@ -195,13 +199,8 @@ export function MobilePageSnap() {
       const deltaY = touchY - y;
       const deltaX = touchX - x;
 
-      if (Math.abs(deltaY) < 10 && Math.abs(deltaX) < 10) return;
+      if (Math.abs(deltaY) < 6 && Math.abs(deltaX) < 6) return;
       touchMoved = true;
-
-      const sheet = (event.target as HTMLElement | null)?.closest?.(
-        ".slide-panel__sheet",
-      ) as HTMLElement | null;
-      if (sheet && sheetBlocksPageSwipe(sheet, deltaY)) return;
 
       if (Math.abs(deltaY) >= Math.abs(deltaX)) {
         event.preventDefault();
@@ -212,7 +211,8 @@ export function MobilePageSnap() {
       if (reduce.matches) return;
       const wasActive = touchActive;
       touchActive = false;
-      if (!wasActive || animating) return;
+      if (!wasActive) return;
+      if (locked()) return;
 
       const endY = event.changedTouches[0]?.clientY ?? touchY;
       const endX = event.changedTouches[0]?.clientX ?? touchX;
@@ -220,37 +220,40 @@ export function MobilePageSnap() {
       const deltaX = touchX - endX;
 
       if (!touchMoved) return;
-      if (Math.abs(deltaY) < 40 || Math.abs(deltaY) < Math.abs(deltaX) * 1.05) {
+      if (Math.abs(deltaY) < 28 || Math.abs(deltaY) < Math.abs(deltaX) * 1.05) {
         return;
       }
 
-      const sheet = (event.target as HTMLElement | null)?.closest?.(
-        ".slide-panel__sheet",
-      ) as HTMLElement | null;
-      if (sheet && sheetBlocksPageSwipe(sheet, deltaY)) return;
-
-      const synced = nearestIndex();
-      if (Math.abs(synced - index) > 1) index = synced;
-
-      goTo(index + (deltaY > 0 ? 1 : -1));
+      step(deltaY > 0 ? 1 : -1);
     };
 
     const onKey = (event: KeyboardEvent) => {
-      if (reduce.matches || animating) return;
+      if (reduce.matches) return;
+      if (locked()) {
+        if (
+          event.key === "ArrowDown" ||
+          event.key === "PageDown" ||
+          event.key === "ArrowUp" ||
+          event.key === "PageUp"
+        ) {
+          event.preventDefault();
+        }
+        return;
+      }
       if (event.key === "ArrowDown" || event.key === "PageDown") {
         event.preventDefault();
-        goTo(index + 1);
+        step(1);
       }
       if (event.key === "ArrowUp" || event.key === "PageUp") {
         event.preventDefault();
-        goTo(index - 1);
+        step(-1);
       }
     };
 
     const boot = () => {
       measure();
       index = nearestIndex();
-      pages.forEach((page) => setSheet(page, "to", false));
+      settleAll();
       if (!reduce.matches) {
         document.documentElement.classList.add("page-snap-on");
       } else {
@@ -260,8 +263,9 @@ export function MobilePageSnap() {
 
     const onReduce = () => {
       if (reduce.matches) {
-        pages.forEach((page) => setSheet(page, "reset", false));
+        pages.forEach((page) => clearFlipClasses(sheetOf(page)));
         animating = false;
+        cooldownUntil = 0;
         document.documentElement.classList.remove("page-snap-on");
       } else {
         boot();
@@ -276,6 +280,7 @@ export function MobilePageSnap() {
     window.addEventListener("touchcancel", onTouchEnd, { passive: true });
     window.addEventListener("keydown", onKey);
     window.addEventListener("resize", measure);
+    window.visualViewport?.addEventListener("resize", measure);
     reduce.addEventListener("change", onReduce);
 
     return () => {
@@ -288,9 +293,10 @@ export function MobilePageSnap() {
       window.removeEventListener("touchcancel", onTouchEnd);
       window.removeEventListener("keydown", onKey);
       window.removeEventListener("resize", measure);
+      window.visualViewport?.removeEventListener("resize", measure);
       reduce.removeEventListener("change", onReduce);
       document.documentElement.classList.remove("page-snap-on");
-      pages.forEach((page) => setSheet(page, "reset", false));
+      pages.forEach((page) => clearFlipClasses(sheetOf(page)));
     };
   }, []);
 

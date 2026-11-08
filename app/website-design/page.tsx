@@ -17,6 +17,7 @@ export default function WebsiteDesignPage() {
       heroDescription={page.heroDescription}
       features={page.features}
       faqIds={page.faqIds}
+      serviceSlug="website-design"
     />
   );
 }

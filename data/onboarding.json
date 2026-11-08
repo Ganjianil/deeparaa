@@ -2,26 +2,26 @@
   {
     "step": 1,
     "title": "Discovery",
-    "description": "We learn your goals, audience, competitors, and success metrics through workshops and research."
+    "description": "We learn your goals, audience, competitors, and success metrics through workshops and research. You leave with a shared brief—what success looks like, constraints, and priorities."
   },
   {
     "step": 2,
     "title": "Strategy",
-    "description": "We define positioning, channel mix, timelines, and KPIs aligned with your business objectives."
+    "description": "We define positioning, channel mix, timelines, and KPIs aligned with your business objectives. Scope, milestones, and owners are clear before design or ads start."
   },
   {
     "step": 3,
     "title": "Design & Development",
-    "description": "Our team designs and builds iteratively with your feedback at every milestone."
+    "description": "Our team designs and builds iteratively with your feedback at every milestone. You review working progress—not surprises at the end."
   },
   {
     "step": 4,
     "title": "Testing",
-    "description": "QA, performance checks, and user validation ensure everything works flawlessly before launch."
+    "description": "QA, performance checks, and user validation ensure everything works flawlessly before launch. We catch bugs, slow pages, and unclear flows early."
   },
   {
     "step": 5,
     "title": "Launch",
-    "description": "We deploy, monitor, and hand off with documentation plus ongoing optimization support."
+    "description": "We deploy, monitor, and hand off with documentation plus ongoing optimization support—so your team knows what shipped and what to measure next."
   }
 ]
