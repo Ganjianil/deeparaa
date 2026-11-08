@@ -1,22 +1,35 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminOverviewPage() {
-  const [
-    userCount,
-    leadCount,
-    newLeadCount,
-    packageCount,
-    orderCount,
-    clientCount,
-  ] = await Promise.all([
-    prisma.user.count(),
-    prisma.lead.count(),
-    prisma.lead.count({ where: { status: "NEW" } }),
-    prisma.package.count(),
-    prisma.order.count(),
-    prisma.client.count(),
-  ]);
+  let userCount = 0;
+  let leadCount = 0;
+  let newLeadCount = 0;
+  let packageCount = 0;
+  let orderCount = 0;
+  let clientCount = 0;
+
+  try {
+    [
+      userCount,
+      leadCount,
+      newLeadCount,
+      packageCount,
+      orderCount,
+      clientCount,
+    ] = await Promise.all([
+      prisma.user.count(),
+      prisma.lead.count(),
+      prisma.lead.count({ where: { status: "NEW" } }),
+      prisma.package.count(),
+      prisma.order.count(),
+      prisma.client.count(),
+    ]);
+  } catch (err) {
+    console.error("Admin overview stats error:", err);
+  }
 
   const stats = [
     { label: "Packages", value: packageCount, href: "/admin/packages" },

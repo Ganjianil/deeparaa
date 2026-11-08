@@ -5,6 +5,8 @@ import {
   toPublicPackage,
 } from "@/lib/packages";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const service = searchParams.get("service")?.trim() || "";

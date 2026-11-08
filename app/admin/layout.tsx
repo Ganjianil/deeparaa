@@ -2,6 +2,8 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
+export const dynamic = "force-dynamic";
+
 const nav = [
   { href: "/admin", label: "Overview" },
   { href: "/admin/packages", label: "Packages" },
