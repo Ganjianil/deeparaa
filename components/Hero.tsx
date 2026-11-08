@@ -1,9 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { NetworkWeb } from "@/components/landing/NetworkWeb";
-import { SplitFlapBoard } from "@/components/landing/SplitFlapBoard";
 
 const goalCards = [
   {
@@ -24,31 +22,11 @@ const goalCards = [
 ];
 
 export function Hero() {
-  const [reduceMotion, setReduceMotion] = useState(false);
-
-  useEffect(() => {
-    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const sync = () => setReduceMotion(media.matches);
-    sync();
-    media.addEventListener("change", sync);
-    return () => media.removeEventListener("change", sync);
-  }, []);
-
   return (
     <section id="home" aria-labelledby="home-title" className="landing-hero">
       <NetworkWeb />
 
       <div className="landing-hero__copy">
-        <p className="landing-hero__board">
-          <span className="landing-hero__mark" aria-hidden="true">
-            D
-          </span>
-          <SplitFlapBoard
-            text="DEEPARA SOLUTIONS"
-            reduceMotion={reduceMotion}
-          />
-        </p>
-
         <h1 id="home-title" className="landing-hero__statement">
           Build what your business needs next
         </h1>
