@@ -28,7 +28,9 @@ yarn-debug.log*
 yarn-error.log*
 
 # env files
-.env*
+.env
+.env.*
+!.env.example
 
 # prisma
 /prisma/*.db
@@ -39,3 +41,4 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+.neon
