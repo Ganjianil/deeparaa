@@ -506,6 +506,25 @@
   transition: cx 40ms linear, cy 40ms linear;
 }
 
+.network-web__cursor-links {
+  pointer-events: none;
+}
+
+.network-web__cursor-link {
+  stroke: color-mix(in srgb, var(--accent) 78%, #60a5fa);
+  stroke-width: 1.35;
+  stroke-linecap: round;
+  fill: none;
+  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--accent) 45%, transparent));
+}
+
+.network-web__cursor-node {
+  fill: var(--accent);
+  stroke: var(--page);
+  stroke-width: 1.5;
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--accent) 70%, transparent));
+}
+
 .network-web__lines path {
   stroke: color-mix(in srgb, var(--accent) 14%, #9aa4b2 40%);
   stroke-width: 0.9;

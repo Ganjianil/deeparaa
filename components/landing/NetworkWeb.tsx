@@ -9,7 +9,6 @@ type NetworkPoint = {
   anchor?: "start" | "middle" | "end";
 };
 
-/** ABDM-style constellation — labels map to Deepara services */
 const points: NetworkPoint[] = [
   { x: 120, y: 160, label: "Website", anchor: "start" },
   { x: 310, y: 90, label: "Brand", anchor: "middle" },
@@ -70,7 +69,9 @@ const staticEdges = [
 
 const travelRoute = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 0] as const;
 const TRAVEL_DURATION = 18;
-const HOVER_RADIUS = 120;
+/** Nodes within this SVG distance draw a line into the cursor (V / fan). */
+const CURSOR_LINK_RADIUS = 260;
+const MAX_CURSOR_LINKS = 5;
 
 export function NetworkWeb() {
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -102,9 +103,10 @@ export function NetworkWeb() {
 
     const toSvgPoint = (clientX: number, clientY: number) => {
       const rect = host.getBoundingClientRect();
-      const x = ((clientX - rect.left) / rect.width) * 1440;
-      const y = ((clientY - rect.top) / rect.height) * 760;
-      return { x, y };
+      return {
+        x: ((clientX - rect.left) / Math.max(rect.width, 1)) * 1440,
+        y: ((clientY - rect.top) / Math.max(rect.height, 1)) * 760,
+      };
     };
 
     const onMove = (event: PointerEvent) => {
@@ -138,16 +140,23 @@ export function NetworkWeb() {
   const pathId = `network-travel-${reactId}`;
   const glowId = `network-glow-${reactId}`;
 
-  const nearIndexes = useMemo(() => {
-    if (!cursor.active) return new Set<number>();
-    const set = new Set<number>();
-    points.forEach((point, index) => {
-      const dx = point.x - cursor.x;
-      const dy = point.y - cursor.y;
-      if (Math.hypot(dx, dy) <= HOVER_RADIUS) set.add(index);
-    });
-    return set;
+  /** Closest nodes → cursor: these lines form the moving V / fan. */
+  const cursorLinks = useMemo(() => {
+    if (!cursor.active) return [] as { index: number; dist: number }[];
+    return points
+      .map((point, index) => ({
+        index,
+        dist: Math.hypot(point.x - cursor.x, point.y - cursor.y),
+      }))
+      .filter((item) => item.dist <= CURSOR_LINK_RADIUS)
+      .sort((a, b) => a.dist - b.dist)
+      .slice(0, MAX_CURSOR_LINKS);
   }, [cursor]);
+
+  const nearIndexes = useMemo(
+    () => new Set(cursorLinks.map((item) => item.index)),
+    [cursorLinks],
+  );
 
   return (
     <div ref={wrapRef} className="network-web" aria-hidden="true">
@@ -160,19 +169,18 @@ export function NetworkWeb() {
         <defs>
           <path id={pathId} d={travelPath} />
           <radialGradient id={glowId} cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.28" />
-            <stop offset="45%" stopColor="var(--accent)" stopOpacity="0.1" />
+            <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.32" />
+            <stop offset="40%" stopColor="var(--accent)" stopOpacity="0.12" />
             <stop offset="100%" stopColor="var(--accent)" stopOpacity="0" />
           </radialGradient>
         </defs>
 
-        {/* Soft cursor aura — matches ABDM pointer glow */}
         {cursor.active && !reduceMotion ? (
           <circle
             className="network-web__cursor-glow"
             cx={cursor.x}
             cy={cursor.y}
-            r={150}
+            r={170}
             fill={`url(#${glowId})`}
           />
         ) : null}
@@ -195,6 +203,30 @@ export function NetworkWeb() {
             );
           })}
         </g>
+
+        {/* Cursor as temporary vertex — lines converge into a V / fan */}
+        {cursor.active && cursorLinks.length > 0 ? (
+          <g className="network-web__cursor-links">
+            {cursorLinks.map(({ index, dist }) => {
+              const point = points[index];
+              const strength = 1 - dist / CURSOR_LINK_RADIUS;
+              return (
+                <path
+                  key={`cursor-link-${index}`}
+                  className="network-web__cursor-link"
+                  d={`M${point.x} ${point.y} L${cursor.x} ${cursor.y}`}
+                  style={{ opacity: 0.35 + strength * 0.65 }}
+                />
+              );
+            })}
+            <circle
+              className="network-web__cursor-node"
+              cx={cursor.x}
+              cy={cursor.y}
+              r={4.5}
+            />
+          </g>
+        ) : null}
 
         {!reduceMotion && (
           <g>
