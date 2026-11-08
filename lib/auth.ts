@@ -33,6 +33,25 @@ const credentialsSchema = z.object({
   password: z.string().min(6),
 });
 
+/** Localhost is fine for `npm run dev`; on Vercel prefer the deployment host. */
+function resolveAuthUrl() {
+  const configured = process.env.AUTH_URL || process.env.NEXTAUTH_URL || "";
+  const isLocal =
+    !configured ||
+    configured.includes("localhost") ||
+    configured.includes("127.0.0.1");
+
+  if (process.env.VERCEL_URL && isLocal) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+
+  return configured || "http://localhost:3000";
+}
+
+const authUrl = resolveAuthUrl();
+process.env.AUTH_URL = authUrl;
+process.env.NEXTAUTH_URL = authUrl;
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   // Explicit secret so Vercel doesn't rely on implicit AUTH_SECRET detection alone
   secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
