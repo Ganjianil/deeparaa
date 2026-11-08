@@ -91,7 +91,8 @@ export function NetworkWeb() {
   }, [reduceMotion]);
 
   useEffect(() => {
-    const host = wrapRef.current?.closest(".landing-hero") ?? wrapRef.current;
+    const el = wrapRef.current?.closest(".landing-hero") ?? wrapRef.current;
+    const host = el instanceof HTMLElement ? el : null;
     if (!host) return;
 
     const toSvgPoint = (clientX: number, clientY: number) => {
@@ -102,8 +103,9 @@ export function NetworkWeb() {
       };
     };
 
-    const onMove = (event: PointerEvent) => {
-      setCursor({ ...toSvgPoint(event.clientX, event.clientY), active: true });
+    const onMove = (event: Event) => {
+      const { clientX, clientY } = event as PointerEvent;
+      setCursor({ ...toSvgPoint(clientX, clientY), active: true });
     };
     const onLeave = () => setCursor((prev) => ({ ...prev, active: false }));
 
