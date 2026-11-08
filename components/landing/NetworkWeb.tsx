@@ -63,7 +63,8 @@ for (let i = 0; i < points.length; i++) {
 const travelRoute = [0, 1, 2, 3, 4, 5, 6, 7, 0] as const;
 const TRAVEL_DURATION = 16;
 const CURSOR_LINK_RADIUS = 280;
-const MAX_CURSOR_LINKS = 3;
+const MAX_CURSOR_LINKS_DESKTOP = 3;
+const MAX_CURSOR_LINKS_MOBILE = 2;
 
 export function NetworkWeb() {
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -133,6 +134,10 @@ export function NetworkWeb() {
 
   const cursorLinks = useMemo(() => {
     if (!cursor.active) return [] as { index: number; dist: number }[];
+    const maxLinks =
+      typeof window !== "undefined" && window.matchMedia("(max-width: 768px)").matches
+        ? MAX_CURSOR_LINKS_MOBILE
+        : MAX_CURSOR_LINKS_DESKTOP;
     return points
       .map((point, index) => ({
         index,
@@ -140,7 +145,7 @@ export function NetworkWeb() {
       }))
       .filter((item) => item.dist <= CURSOR_LINK_RADIUS)
       .sort((a, b) => a.dist - b.dist)
-      .slice(0, MAX_CURSOR_LINKS);
+      .slice(0, maxLinks);
   }, [cursor]);
 
   const nearIndexes = useMemo(

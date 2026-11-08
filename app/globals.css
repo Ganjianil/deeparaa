@@ -741,22 +741,34 @@
   }
 
   .network-web {
-    opacity: 0.55;
+    opacity: 0.9;
+    transform: scale(1.08);
+    transform-origin: center 38%;
     mask-image: radial-gradient(
-      120% 90% at 50% 40%,
-      #000 20%,
-      rgba(0, 0, 0, 0.45) 60%,
+      130% 100% at 50% 42%,
+      #000 28%,
+      rgba(0, 0, 0, 0.55) 68%,
       transparent 100%
     );
   }
 
   .network-web__label {
-    font-size: 8px;
-    letter-spacing: 0.04em;
+    font-size: 8.5px;
+    letter-spacing: 0.06em;
   }
 
   .network-web__node-disc {
-    r: 14px;
+    r: 15px;
+  }
+
+  .network-web__icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .network-web__icon svg {
+    width: 13px;
+    height: 13px;
   }
 
   .network-web__particle {
@@ -765,6 +777,10 @@
 
   .network-web__flow {
     stroke-width: 2.2;
+  }
+
+  .network-web__cursor-link {
+    stroke-width: 1.5;
   }
 }
 
@@ -3154,6 +3170,28 @@ article.slide-panel {
   perspective: 1800px;
   perspective-origin: 100% 100%;
   -webkit-perspective: 1800px;
+}
+
+/* Snap stack helpers — stop later sticky pages covering earlier ones on scroll-up */
+.slide-panel.is-snap-behind,
+.kota-panel.slide-panel.is-snap-behind,
+section.slide-panel.is-snap-behind,
+article.slide-panel.is-snap-behind,
+.landing-hero.is-snap-behind {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  z-index: 0 !important;
+}
+
+.slide-panel.is-snap-active,
+.kota-panel.slide-panel.is-snap-active,
+section.slide-panel.is-snap-active,
+article.slide-panel.is-snap-active,
+.landing-hero.is-snap-active {
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
 }
 
 .slide-panel--intro {

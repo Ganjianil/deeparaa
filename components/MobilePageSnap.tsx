@@ -3,28 +3,22 @@
 import { useEffect } from "react";
 
 const ANIM_MS = 950;
-/** Absorb leftover trackpad wheel ticks after a flip finishes. */
-const COOLDOWN_MS = 420;
+/** Absorb leftover trackpad / touch inertia after a flip finishes. */
+const COOLDOWN_MS = 380;
 
 function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
 }
 
-/** Document Y from layout — safe for sticky (getBoundingClientRect is not). */
+/** Reliable document Y for sticky / transformed ancestors. */
 function layoutTop(el: HTMLElement) {
-  let y = 0;
-  let node: HTMLElement | null = el;
-  while (node) {
-    y += node.offsetTop;
-    node = node.offsetParent as HTMLElement | null;
-  }
-  return y;
+  return el.getBoundingClientRect().top + window.scrollY;
 }
 
 /**
  * Full-page snap on ALL devices.
  * Bottom-right corner flip on every page change (down and up).
- * One gesture → one page (no double-flip from trackpad wheel bursts).
+ * Upward flips boost the target above stacked sticky panels to avoid overlap.
  */
 export function MobilePageSnap() {
   useEffect(() => {
@@ -51,18 +45,19 @@ export function MobilePageSnap() {
       tops = pages.map((page) => layoutTop(page));
     };
 
+    /** Which page owns the viewport center — works for both up and down. */
     const nearestIndex = () => {
       if (!tops.length) return 0;
-      const y = window.scrollY + window.innerHeight * 0.25;
+      const mid = window.scrollY + window.innerHeight * 0.42;
       let best = 0;
-      let bestDist = Infinity;
       for (let i = 0; i < tops.length; i++) {
-        const dist = Math.abs(tops[i] - (window.scrollY + 1));
-        if (dist < bestDist) {
-          bestDist = dist;
-          best = i;
-        }
-        if (tops[i] <= y) best = i;
+        const start = tops[i];
+        const end =
+          i + 1 < tops.length
+            ? tops[i + 1]
+            : start + window.innerHeight;
+        if (mid >= start && mid < end) return i;
+        if (start <= mid) best = i;
       }
       return best;
     };
@@ -75,12 +70,39 @@ export function MobilePageSnap() {
       sheet.classList.remove("is-flip-from", "is-flip-in", "is-flip-ready");
     };
 
+    const clearStackOverrides = () => {
+      pages.forEach((page) => {
+        page.classList.remove("is-snap-active", "is-snap-behind");
+        page.style.removeProperty("z-index");
+      });
+    };
+
+    /**
+     * Sticky slides stack by z-index — later pages cover earlier ones.
+     * When flipping up, hide pages below the target and raise the target.
+     */
+    const applyStackFor = (active: number) => {
+      pages.forEach((page, i) => {
+        page.classList.remove("is-snap-active", "is-snap-behind");
+        if (i === active) {
+          page.classList.add("is-snap-active");
+          page.style.zIndex = "80";
+        } else if (i > active) {
+          page.classList.add("is-snap-behind");
+          page.style.zIndex = "0";
+        } else {
+          page.style.zIndex = String(10 + i);
+        }
+      });
+    };
+
     const settleAll = () => {
       pages.forEach((page) => {
         const sheet = sheetOf(page);
         clearFlipClasses(sheet);
         sheet?.classList.add("is-flip-in");
       });
+      applyStackFor(index);
     };
 
     const locked = () => animating || performance.now() < cooldownUntil;
@@ -90,6 +112,11 @@ export function MobilePageSnap() {
       index = nextIndex;
       cooldownUntil = performance.now() + COOLDOWN_MS;
       window.clearTimeout(unlockTimer);
+      applyStackFor(index);
+      // Re-measure after layout settles (sticky tops can shift)
+      requestAnimationFrame(() => {
+        if (!disposed) measure();
+      });
     };
 
     const goTo = (next: number) => {
@@ -101,6 +128,7 @@ export function MobilePageSnap() {
       next = clamp(next, 0, pages.length - 1);
       if (next === index) {
         animating = false;
+        applyStackFor(index);
         return;
       }
 
@@ -110,6 +138,9 @@ export function MobilePageSnap() {
       const target = pages[next];
       const top = Math.max(0, tops[next] ?? layoutTop(target));
       const sheet = sheetOf(target);
+
+      // Bring target above stacked stickies BEFORE scrolling (critical for up)
+      applyStackFor(next);
 
       pages.forEach((page) => {
         if (page === target) return;
@@ -130,7 +161,7 @@ export function MobilePageSnap() {
       unlockTimer = window.setTimeout(() => {
         requestAnimationFrame(() => {
           if (!sheet) {
-            unlockTimer = window.setTimeout(() => unlock(next), 120);
+            unlockTimer = window.setTimeout(() => unlock(next), 100);
             return;
           }
 
@@ -163,7 +194,9 @@ export function MobilePageSnap() {
 
     const step = (dir: 1 | -1) => {
       if (locked()) return;
+      measure();
       const synced = nearestIndex();
+      // Prefer sync when user drifted, but don't skip a page on intentional step
       if (Math.abs(synced - index) >= 1) index = synced;
       goTo(index + dir);
     };
@@ -172,11 +205,9 @@ export function MobilePageSnap() {
       if (reduce.matches || disposed) return;
       if (Math.abs(event.deltaY) < 8) return;
 
-      // Don't trap wheel while user interacts with links/buttons
       const target = event.target as HTMLElement | null;
       if (target?.closest?.("a, button, input, textarea, select")) return;
 
-      // Always consume wheel so native scroll can't fight the snap
       event.preventDefault();
       if (locked()) return;
 
@@ -199,10 +230,11 @@ export function MobilePageSnap() {
       const deltaY = touchY - y;
       const deltaX = touchX - x;
 
-      if (Math.abs(deltaY) < 6 && Math.abs(deltaX) < 6) return;
+      if (Math.abs(deltaY) < 5 && Math.abs(deltaX) < 5) return;
       touchMoved = true;
 
-      if (Math.abs(deltaY) >= Math.abs(deltaX)) {
+      // Lock vertical native scroll so sticky stack can't fight the snap
+      if (Math.abs(deltaY) >= Math.abs(deltaX) * 0.85) {
         event.preventDefault();
       }
     };
@@ -220,7 +252,9 @@ export function MobilePageSnap() {
       const deltaX = touchX - endX;
 
       if (!touchMoved) return;
-      if (Math.abs(deltaY) < 28 || Math.abs(deltaY) < Math.abs(deltaX) * 1.05) {
+      // Slightly easier upward swipe (finger moves down → go up a page)
+      const threshold = deltaY < 0 ? 22 : 28;
+      if (Math.abs(deltaY) < threshold || Math.abs(deltaY) < Math.abs(deltaX)) {
         return;
       }
 
@@ -264,6 +298,7 @@ export function MobilePageSnap() {
     const onReduce = () => {
       if (reduce.matches) {
         pages.forEach((page) => clearFlipClasses(sheetOf(page)));
+        clearStackOverrides();
         animating = false;
         cooldownUntil = 0;
         document.documentElement.classList.remove("page-snap-on");
@@ -296,6 +331,7 @@ export function MobilePageSnap() {
       window.visualViewport?.removeEventListener("resize", measure);
       reduce.removeEventListener("change", onReduce);
       document.documentElement.classList.remove("page-snap-on");
+      clearStackOverrides();
       pages.forEach((page) => clearFlipClasses(sheetOf(page)));
     };
   }, []);
