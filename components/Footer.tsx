@@ -39,7 +39,11 @@ const footerServices = serviceCatalog.map((service) => ({
 
 const socialLinks = [
   { label: "Facebook", href: "https://www.facebook.com/", icon: FaFacebookF },
-  { label: "Instagram", href: "https://www.instagram.com/", icon: FaInstagram },
+  {
+    label: "Instagram",
+    href: "https://www.instagram.com/deeparasolutions?dlrf=eWRma2p3eHpuY3h1&utm_source=qr",
+    icon: FaInstagram,
+  },
   { label: "LinkedIn", href: "https://www.linkedin.com/", icon: FaLinkedinIn },
   { label: "YouTube", href: "https://www.youtube.com/", icon: FaYoutube },
 ];
@@ -135,8 +139,9 @@ export function Footer() {
                   <MapPin size={16} strokeWidth={1.8} />
                 </span>
                 <p>
-                  Flat No. 2b, Begumpet, Near Metro, Greenlands, Hyderabad,
-                  Telangana 500082
+                  E/10, Aparna Astute, 2nd floor, 8-1-293, Old Mumbai Hwy,
+                  Senore Colony, Aparna Senore Valley Villas, Ambedkar,
+                  Shaikpet, Hyderabad
                 </p>
               </div>
               <a
