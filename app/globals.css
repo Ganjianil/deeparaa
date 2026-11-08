@@ -83,6 +83,11 @@
     scroll-behavior: smooth;
     scroll-padding-top: calc(var(--topbar-height) + 0.75rem);
     background: var(--page);
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 
   body {
@@ -92,6 +97,24 @@
     font-weight: 400;
     line-height: 1.65;
     -webkit-font-smoothing: antialiased;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip;
+    position: relative;
+  }
+
+  main {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip;
+  }
+
+  img,
+  svg,
+  video,
+  canvas {
+    max-width: 100%;
+    height: auto;
   }
 
   h1,
@@ -675,6 +698,7 @@
   }
 
   .landing-hero__statement {
+    max-width: none;
     font-size: clamp(1.45rem, 6.2vw, 1.85rem);
     line-height: 1.2;
   }
@@ -740,9 +764,8 @@
   }
 
   .network-web {
-    opacity: 0.48;
-    transform: scale(1.05);
-    transform-origin: center 38%;
+    opacity: 0.45;
+    transform: none;
     mask-image: radial-gradient(
       120% 95% at 50% 42%,
       #000 22%,
@@ -3058,8 +3081,6 @@ button.kota-more {
   }
 }
 
-/* Page-turn feel is handled once per sheet via .page-turn-sheet (no scroll-linked lag). */
-
 /* Remap legacy marketing accents on remaining pages to ABDM tokens */
 main .bg-\[\#062c46\],
 main .bg-\[\#082f49\],
@@ -3126,7 +3147,7 @@ main button.rounded-full[class*="bg-"] {
 }
 
 /* --------------------------------------------------------------------------
-   Natural scroll + one-shot page-turn (no sticky / snap stacking)
+   Plain sections — normal document flow (no flip / page-turn / scale)
    -------------------------------------------------------------------------- */
 .slide-panel,
 .kota-panel.slide-panel,
@@ -3143,16 +3164,9 @@ article.slide-panel {
   box-sizing: border-box;
   background: transparent;
   overflow: visible;
-  perspective: 1400px;
-  -webkit-perspective: 1400px;
-  scroll-snap-align: start;
-  scroll-snap-stop: normal;
-}
-
-@media (min-width: 901px) {
-  html {
-    scroll-snap-type: y proximity;
-  }
+  perspective: none;
+  -webkit-perspective: none;
+  transform: none !important;
 }
 
 .slide-panel.is-snap-behind,
@@ -3186,77 +3200,11 @@ article.slide-panel.is-snap-active,
   background: #efefef;
   box-shadow: none;
   border-radius: 0;
+  transform: none !important;
+  opacity: 1 !important;
   will-change: auto;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-
-/* Page-turn: readable by default; effect only after JS adds a mode class */
-.page-turn-sheet {
-  transform-origin: 50% 0%;
-  transform: none;
-  opacity: 1;
-}
-
-/* Chrome / Edge / Safari: scrubbed page-turn as the sheet enters the viewport */
-@supports (animation-timeline: view()) {
-  .page-turn-sheet.page-turn--view {
-    animation: page-turn-sheet linear both;
-    animation-timeline: view();
-    animation-range: entry 0% cover 42%;
-  }
-
-  @keyframes page-turn-sheet {
-    from {
-      transform: rotateX(28deg) translate3d(0, 56px, 0) scale(0.97);
-      opacity: 0.25;
-      box-shadow: 0 28px 48px rgba(0, 0, 0, 0.18);
-    }
-    to {
-      transform: none;
-      opacity: 1;
-      box-shadow: 0 8px 28px rgba(17, 17, 17, 0.06);
-    }
-  }
-}
-
-/* Fallback browsers: one-shot turn when the sheet crosses into view */
-.page-turn-sheet.page-turn--io:not(.is-page-in) {
-  transform: rotateX(14deg) translate3d(0, 28px, 0);
-  opacity: 0.5;
-}
-
-.page-turn-sheet.page-turn--io {
-  transition:
-    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 0.45s ease;
-}
-
-.page-turn-sheet.page-turn--io.is-page-in {
-  transform: none;
-  opacity: 1;
-}
-
-@media (max-width: 768px) {
-  @supports (animation-timeline: view()) {
-    @keyframes page-turn-sheet {
-      from {
-        transform: rotateX(16deg) translate3d(0, 32px, 0) scale(0.98);
-        opacity: 0.4;
-        box-shadow: 0 16px 32px rgba(0, 0, 0, 0.12);
-      }
-      to {
-        transform: none;
-        opacity: 1;
-        box-shadow: 0 8px 28px rgba(17, 17, 17, 0.06);
-      }
-    }
-  }
-
-  .page-turn-sheet.page-turn--io:not(.is-page-in) {
-    transform: rotateX(12deg) translate3d(0, 20px, 0);
-    opacity: 0.55;
-  }
+  backface-visibility: visible;
+  -webkit-backface-visibility: visible;
 }
 
 .slide-panel__sheet.is-flip-ready,
@@ -3469,8 +3417,8 @@ article.slide-panel.is-snap-active,
   padding: 1.35rem 1.1rem 1.5rem;
   justify-content: space-between;
   background: #fff;
-  border-radius: 1rem;
-  box-shadow: 0 8px 28px rgba(17, 17, 17, 0.06);
+  border-radius: 0;
+  box-shadow: none;
 }
 
 @media (min-width: 901px) {
@@ -3591,9 +3539,7 @@ article.slide-panel.is-snap-active,
     perspective: none;
   }
 
-  .slide-panel__sheet,
-  .page-turn-sheet,
-  .page-turn-sheet.is-page-in {
+  .slide-panel__sheet {
     height: auto;
     max-height: none;
     transform: none !important;
