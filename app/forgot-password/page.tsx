@@ -4,13 +4,18 @@ import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 
+type Step = "email" | "otp" | "password";
+
 export default function ForgotPasswordPage() {
   const router = useRouter();
+  const [step, setStep] = useState<Step>("email");
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+  const [otp, setOtp] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [resetToken, setResetToken] = useState<string | null>(null);
+  const [maskedPhone, setMaskedPhone] = useState("");
+  const [whatsappUrl, setWhatsappUrl] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,36 +26,73 @@ export default function ForgotPasswordPage() {
     color: "var(--text-heading)",
   } as const;
 
-  const verifyAccount = async (event: FormEvent) => {
+  const requestOtp = async () => {
+    setError("");
+    setMessage("");
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/otp/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const data = (await res.json()) as {
+        error?: string;
+        message?: string;
+        sent?: boolean;
+        maskedPhone?: string;
+        whatsappUrl?: string;
+      };
+      if (!res.ok) {
+        setError(data.error || "Unable to send OTP.");
+        return;
+      }
+      if (!data.sent) {
+        setError("No account found for that email, or mobile is missing.");
+        return;
+      }
+      setMaskedPhone(data.maskedPhone || "");
+      setWhatsappUrl(data.whatsappUrl || null);
+      setMessage(data.message || "OTP sent.");
+      setOtp("");
+      setStep("otp");
+    } catch {
+      setError("Unable to send OTP right now.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const sendOtp = async (event: FormEvent) => {
+    event.preventDefault();
+    await requestOtp();
+  };
+
+  const verifyOtp = async (event: FormEvent) => {
     event.preventDefault();
     setError("");
     setMessage("");
     setLoading(true);
     try {
-      const res = await fetch("/api/auth/forgot-password", {
+      const res = await fetch("/api/auth/otp/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, phone }),
+        body: JSON.stringify({ email, otp }),
       });
       const data = (await res.json()) as {
         error?: string;
         message?: string;
-        resetToken?: string | null;
+        resetToken?: string;
       };
-      if (!res.ok) {
-        setError(data.error || "Unable to verify account.");
-        return;
-      }
-      if (!data.resetToken) {
-        setError(
-          "No matching account for that email and mobile. Check and try again.",
-        );
+      if (!res.ok || !data.resetToken) {
+        setError(data.error || "Invalid OTP.");
         return;
       }
       setResetToken(data.resetToken);
-      setMessage(data.message || "Verified. Set a new password.");
+      setMessage(data.message || "OTP verified.");
+      setStep("password");
     } catch {
-      setError("Unable to verify account right now.");
+      setError("Unable to verify OTP right now.");
     } finally {
       setLoading(false);
     }
@@ -65,7 +107,8 @@ export default function ForgotPasswordPage() {
       return;
     }
     if (!resetToken) {
-      setError("Verification expired. Start again.");
+      setError("Session expired. Start again.");
+      setStep("email");
       return;
     }
     setLoading(true);
@@ -89,6 +132,13 @@ export default function ForgotPasswordPage() {
     }
   };
 
+  const stepCopy =
+    step === "email"
+      ? "Enter your account email. We’ll send a one-time password (OTP)."
+      : step === "otp"
+        ? `Enter the 6-digit OTP sent for ${maskedPhone || "your mobile"}.`
+        : "Choose a new password for your account.";
+
   return (
     <section
       className="relative min-h-[calc(100vh-var(--topbar-height))] px-5 py-16 sm:px-8"
@@ -111,15 +161,29 @@ export default function ForgotPasswordPage() {
         >
           Deepara Solutions
         </p>
-        <h1 className="mt-3 text-3xl">Reset password</h1>
+        <h1 className="mt-3 text-3xl">Reset with OTP</h1>
         <p className="mt-2 text-sm" style={{ color: "var(--text-muted)" }}>
-          {resetToken
-            ? "Choose a new password for your account."
-            : "Confirm the email and mobile number used at signup."}
+          {stepCopy}
         </p>
 
-        {!resetToken ? (
-          <form onSubmit={verifyAccount} className="mt-8 space-y-4">
+        <div className="mt-5 flex gap-2 text-xs font-semibold uppercase tracking-[0.12em]">
+          {(["email", "otp", "password"] as Step[]).map((item, index) => (
+            <span
+              key={item}
+              className="rounded-full px-2.5 py-1"
+              style={{
+                background:
+                  step === item ? "var(--accent-soft)" : "var(--fill-soft)",
+                color: step === item ? "var(--accent)" : "var(--text-muted)",
+              }}
+            >
+              {index + 1}. {item}
+            </span>
+          ))}
+        </div>
+
+        {step === "email" ? (
+          <form onSubmit={sendOtp} className="mt-8 space-y-4">
             <label className="block space-y-2">
               <span className="text-sm font-medium">Email</span>
               <input
@@ -131,15 +195,52 @@ export default function ForgotPasswordPage() {
                 style={inputStyle}
               />
             </label>
+            {error ? (
+              <p className="text-sm" style={{ color: "#b42318" }}>
+                {error}
+              </p>
+            ) : null}
+            <button
+              type="submit"
+              className="btn-accent w-full justify-center"
+              disabled={loading}
+            >
+              {loading ? "Sending OTP…" : "Send OTP"}
+            </button>
+          </form>
+        ) : null}
+
+        {step === "otp" ? (
+          <form onSubmit={verifyOtp} className="mt-8 space-y-4">
+            {message ? (
+              <p className="text-sm" style={{ color: "var(--accent)" }}>
+                {message}
+              </p>
+            ) : null}
+            {whatsappUrl ? (
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="btn-ghost inline-flex w-full justify-center"
+              >
+                Get OTP on WhatsApp
+              </a>
+            ) : null}
             <label className="block space-y-2">
-              <span className="text-sm font-medium">Mobile number</span>
+              <span className="text-sm font-medium">6-digit OTP</span>
               <input
-                type="tel"
+                inputMode="numeric"
+                pattern="\d{6}"
+                maxLength={6}
                 required
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="w-full rounded-[var(--radius-control)] border px-4 py-3 text-sm"
+                value={otp}
+                onChange={(e) =>
+                  setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
+                }
+                className="w-full rounded-[var(--radius-control)] border px-4 py-3 text-center text-lg tracking-[0.35em]"
                 style={inputStyle}
+                placeholder="••••••"
               />
             </label>
             {error ? (
@@ -147,11 +248,25 @@ export default function ForgotPasswordPage() {
                 {error}
               </p>
             ) : null}
-            <button type="submit" className="btn-accent w-full justify-center" disabled={loading}>
-              {loading ? "Checking…" : "Continue"}
+            <button
+              type="submit"
+              className="btn-accent w-full justify-center"
+              disabled={loading || otp.length !== 6}
+            >
+              {loading ? "Verifying…" : "Verify OTP"}
+            </button>
+            <button
+              type="button"
+              className="btn-ghost w-full justify-center"
+              disabled={loading}
+              onClick={() => void requestOtp()}
+            >
+              Resend OTP
             </button>
           </form>
-        ) : (
+        ) : null}
+
+        {step === "password" ? (
           <form onSubmit={savePassword} className="mt-8 space-y-4">
             {message ? (
               <p className="text-sm" style={{ color: "var(--accent)" }}>
@@ -187,14 +302,25 @@ export default function ForgotPasswordPage() {
                 {error}
               </p>
             ) : null}
-            <button type="submit" className="btn-accent w-full justify-center" disabled={loading}>
+            <button
+              type="submit"
+              className="btn-accent w-full justify-center"
+              disabled={loading}
+            >
               {loading ? "Saving…" : "Update password"}
             </button>
           </form>
-        )}
+        ) : null}
 
-        <p className="mt-6 text-center text-sm" style={{ color: "var(--text-muted)" }}>
-          <Link href="/login" className="font-medium" style={{ color: "var(--accent)" }}>
+        <p
+          className="mt-6 text-center text-sm"
+          style={{ color: "var(--text-muted)" }}
+        >
+          <Link
+            href="/login"
+            className="font-medium"
+            style={{ color: "var(--accent)" }}
+          >
             Back to sign in
           </Link>
         </p>
