@@ -3042,12 +3042,13 @@ main button.rounded-full[class*="bg-"] {
 section.slide-panel,
 article.slide-panel {
   position: sticky !important;
-  top: 0 !important;
+  /* Sit below the fixed header so content never slides underneath it */
+  top: var(--topbar-height) !important;
   z-index: var(--slide-z, 1);
   width: 100%;
-  height: 100svh !important;
-  min-height: 100svh !important;
-  max-height: 100svh !important;
+  height: calc(100svh - var(--topbar-height)) !important;
+  min-height: calc(100svh - var(--topbar-height)) !important;
+  max-height: calc(100svh - var(--topbar-height)) !important;
   display: flex;
   flex-direction: column;
   justify-content: stretch;

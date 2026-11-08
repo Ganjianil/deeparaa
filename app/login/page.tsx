@@ -1,12 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { FormEvent, Suspense, useState } from "react";
 
 function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
 
@@ -24,6 +23,7 @@ function LoginForm() {
       email: email.trim().toLowerCase(),
       password,
       redirect: false,
+      callbackUrl,
     });
 
     setLoading(false);
@@ -33,8 +33,8 @@ function LoginForm() {
       return;
     }
 
-    router.push(callbackUrl);
-    router.refresh();
+    // Hard navigation so the session cookie is always sent to /admin middleware
+    window.location.assign(result?.url || callbackUrl);
   };
 
   return (
@@ -101,6 +101,16 @@ function LoginForm() {
             {error}
           </p>
         ) : null}
+
+        <div className="flex justify-end">
+          <Link
+            href="/forgot-password"
+            className="text-sm font-medium"
+            style={{ color: "var(--accent)" }}
+          >
+            Forgot password?
+          </Link>
+        </div>
 
         <button
           type="submit"

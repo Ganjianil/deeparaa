@@ -9,9 +9,19 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET;
+  if (!secret) {
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("callbackUrl", pathname);
+    loginUrl.searchParams.set("error", "config");
+    return NextResponse.redirect(loginUrl);
+  }
+
   const token = await getToken({
     req: request,
-    secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
+    secret,
+    // Auth.js / NextAuth secure cookies on HTTPS (Vercel)
+    secureCookie: request.nextUrl.protocol === "https:",
   });
 
   if (!token) {
@@ -20,7 +30,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  if (token.role !== "ADMIN") {
+  if (String(token.role || "").toUpperCase() !== "ADMIN") {
     return NextResponse.redirect(new URL("/", request.url));
   }
 

@@ -52,11 +52,31 @@ const authUrl = resolveAuthUrl();
 process.env.AUTH_URL = authUrl;
 process.env.NEXTAUTH_URL = authUrl;
 
+const authSecret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET;
+const useSecureCookies =
+  authUrl.startsWith("https://") || Boolean(process.env.VERCEL);
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   // Explicit secret so Vercel doesn't rely on implicit AUTH_SECRET detection alone
-  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
+  secret: authSecret,
   trustHost: true,
-  session: { strategy: "jwt" },
+  session: {
+    strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60,
+  },
+  cookies: {
+    sessionToken: {
+      name: useSecureCookies
+        ? "__Secure-authjs.session-token"
+        : "authjs.session-token",
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: useSecureCookies,
+      },
+    },
+  },
   pages: {
     signIn: "/login",
   },
